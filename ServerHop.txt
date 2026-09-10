@@ -1,4 +1,4 @@
--- ServerHop Hub - Server Hop Moderno
+-- ServerHop Hub - Compatible con Delta
 local Players = game:GetService("Players")
 local TeleportService = game:GetService("TeleportService")
 local HttpService = game:GetService("HttpService")
@@ -32,11 +32,13 @@ MainFrame.Size = UDim2.new(0, 320, 0, 280)
 MainFrame.Active = true
 MainFrame.Draggable = true
 
-local Corner = Instance.new("UICorner", MainFrame)
+local Corner = Instance.new("UICorner")
+Corner.Parent = MainFrame
 Corner.CornerRadius = UDim.new(0, 16)
 
-local Shadow = Instance.new("ImageLabel", MainFrame)
+local Shadow = Instance.new("ImageLabel")
 Shadow.Name = "Shadow"
+Shadow.Parent = MainFrame
 Shadow.BackgroundTransparency = 1
 Shadow.Position = UDim2.new(0, -20, 0, -20)
 Shadow.Size = UDim2.new(1, 40, 1, 40)
@@ -47,7 +49,8 @@ Shadow.ImageTransparency = 0.4
 Shadow.ScaleType = Enum.ScaleType.Slice
 Shadow.SliceCenter = Rect.new(49, 49, 450, 450)
 
-local Gradient = Instance.new("UIGradient", MainFrame)
+local Gradient = Instance.new("UIGradient")
+Gradient.Parent = MainFrame
 Gradient.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 30, 50)),
     ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 20, 35))
@@ -55,28 +58,33 @@ Gradient.Color = ColorSequence.new({
 Gradient.Rotation = 45
 
 -- Barra de titulo
-local TitleBar = Instance.new("Frame", MainFrame)
+local TitleBar = Instance.new("Frame")
+TitleBar.Parent = MainFrame
 TitleBar.Size = UDim2.new(1, 0, 0, 45)
 TitleBar.BackgroundColor3 = Color3.fromRGB(40, 40, 70)
 TitleBar.BorderSizePixel = 0
 
-local TitleCorner = Instance.new("UICorner", TitleBar)
+local TitleCorner = Instance.new("UICorner")
+TitleCorner.Parent = TitleBar
 TitleCorner.CornerRadius = UDim.new(0, 16)
 
-local TitleGradient = Instance.new("UIGradient", TitleBar)
+local TitleGradient = Instance.new("UIGradient")
+TitleGradient.Parent = TitleBar
 TitleGradient.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(0, Color3.fromRGB(100, 50, 200)),
     ColorSequenceKeypoint.new(1, Color3.fromRGB(60, 30, 150))
 })
 
-local TitleFix = Instance.new("Frame", TitleBar)
+local TitleFix = Instance.new("Frame")
+TitleFix.Parent = TitleBar
 TitleFix.Size = UDim2.new(1, 0, 0.5, 0)
 TitleFix.Position = UDim2.new(0, 0, 0.5, 0)
 TitleFix.BackgroundColor3 = Color3.fromRGB(40, 40, 70)
 TitleFix.BorderSizePixel = 0
 
--- TITULO CAMBIADO AQUI
-local Title = Instance.new("TextLabel", TitleBar)
+-- TITULO
+local Title = Instance.new("TextLabel")
+Title.Parent = TitleBar
 Title.Size = UDim2.new(1, -50, 1, 0)
 Title.Position = UDim2.new(0, 15, 0, 0)
 Title.BackgroundTransparency = 1
@@ -85,7 +93,8 @@ Title.Text = "SERVERHOP HUB"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 18
 
-local Subtitle = Instance.new("TextLabel", TitleBar)
+local Subtitle = Instance.new("TextLabel")
+Subtitle.Parent = TitleBar
 Subtitle.Size = UDim2.new(1, -50, 0, 20)
 Subtitle.Position = UDim2.new(0, 15, 0, 28)
 Subtitle.BackgroundTransparency = 1
@@ -95,17 +104,19 @@ Subtitle.TextColor3 = Color3.fromRGB(200, 180, 255)
 Subtitle.TextSize = 11
 
 -- Boton cerrar
-local CloseBtn = Instance.new("TextButton", TitleBar)
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Parent = TitleBar
 CloseBtn.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
 CloseBtn.Position = UDim2.new(1, -35, 0, 10)
 CloseBtn.Size = UDim2.new(0, 26, 0, 26)
 CloseBtn.Font = Enum.Font.GothamBold
-CloseBtn.Text = "×"
+CloseBtn.Text = "X"
 CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-CloseBtn.TextSize = 20
+CloseBtn.TextSize = 18
 CloseBtn.AutoButtonColor = false
 
-local CloseCorner = Instance.new("UICorner", CloseBtn)
+local CloseCorner = Instance.new("UICorner")
+CloseCorner.Parent = CloseBtn
 CloseCorner.CornerRadius = UDim.new(1, 0)
 
 CloseBtn.MouseEnter:Connect(function()
@@ -121,23 +132,27 @@ CloseBtn.MouseButton1Click:Connect(function()
 end)
 
 -- Contador de jugadores
-local PlayerCard = Instance.new("Frame", MainFrame)
+local PlayerCard = Instance.new("Frame")
+PlayerCard.Parent = MainFrame
 PlayerCard.Position = UDim2.new(0, 15, 0, 55)
 PlayerCard.Size = UDim2.new(1, -30, 0, 50)
 PlayerCard.BackgroundColor3 = Color3.fromRGB(35, 35, 60)
 PlayerCard.BorderSizePixel = 0
 
-local PlayerCardCorner = Instance.new("UICorner", PlayerCard)
+local PlayerCardCorner = Instance.new("UICorner")
+PlayerCardCorner.Parent = PlayerCard
 PlayerCardCorner.CornerRadius = UDim.new(0, 12)
 
-local PlayerIcon = Instance.new("TextLabel", PlayerCard)
+local PlayerIcon = Instance.new("TextLabel")
+PlayerIcon.Parent = PlayerCard
 PlayerIcon.Size = UDim2.new(0, 40, 1, 0)
 PlayerIcon.BackgroundTransparency = 1
 PlayerIcon.Font = Enum.Font.GothamBold
-PlayerIcon.Text = "👥"
+PlayerIcon.Text = "P"
 PlayerIcon.TextSize = 24
 
-local NowLabel = Instance.new("TextLabel", PlayerCard)
+local NowLabel = Instance.new("TextLabel")
+NowLabel.Parent = PlayerCard
 NowLabel.Position = UDim2.new(0, 45, 0, 8)
 NowLabel.Size = UDim2.new(1, -55, 0, 18)
 NowLabel.BackgroundTransparency = 1
@@ -146,7 +161,8 @@ NowLabel.TextXAlignment = Enum.TextXAlignment.Left
 NowLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 NowLabel.TextSize = 14
 
-local PlayerCountLabel = Instance.new("TextLabel", PlayerCard)
+local PlayerCountLabel = Instance.new("TextLabel")
+PlayerCountLabel.Parent = PlayerCard
 PlayerCountLabel.Position = UDim2.new(0, 45, 0, 26)
 PlayerCountLabel.Size = UDim2.new(1, -55, 0, 16)
 PlayerCountLabel.BackgroundTransparency = 1
@@ -157,16 +173,19 @@ PlayerCountLabel.TextSize = 11
 PlayerCountLabel.Text = "Jugadores conectados"
 
 -- Barra de estado
-local StatusBar = Instance.new("Frame", MainFrame)
+local StatusBar = Instance.new("Frame")
+StatusBar.Parent = MainFrame
 StatusBar.Position = UDim2.new(0, 15, 0, 112)
 StatusBar.Size = UDim2.new(1, -30, 0, 35)
 StatusBar.BackgroundColor3 = Color3.fromRGB(30, 30, 50)
 StatusBar.BorderSizePixel = 0
 
-local StatusCorner = Instance.new("UICorner", StatusBar)
+local StatusCorner = Instance.new("UICorner")
+StatusCorner.Parent = StatusBar
 StatusCorner.CornerRadius = UDim.new(0, 10)
 
-local StatusLabel = Instance.new("TextLabel", StatusBar)
+local StatusLabel = Instance.new("TextLabel")
+StatusLabel.Parent = StatusBar
 StatusLabel.Size = UDim2.new(1, -20, 1, 0)
 StatusLabel.Position = UDim2.new(0, 10, 0, 0)
 StatusLabel.BackgroundTransparency = 1
@@ -177,16 +196,19 @@ StatusLabel.TextSize = 12
 StatusLabel.TextWrapped = true
 
 -- Configuracion
-local ConfigFrame = Instance.new("Frame", MainFrame)
+local ConfigFrame = Instance.new("Frame")
+ConfigFrame.Parent = MainFrame
 ConfigFrame.Position = UDim2.new(0, 15, 0, 155)
 ConfigFrame.Size = UDim2.new(1, -30, 0, 55)
 ConfigFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 60)
 ConfigFrame.BorderSizePixel = 0
 
-local ConfigCorner = Instance.new("UICorner", ConfigFrame)
+local ConfigCorner = Instance.new("UICorner")
+ConfigCorner.Parent = ConfigFrame
 ConfigCorner.CornerRadius = UDim.new(0, 12)
 
-local MaxLabel = Instance.new("TextLabel", ConfigFrame)
+local MaxLabel = Instance.new("TextLabel")
+MaxLabel.Parent = ConfigFrame
 MaxLabel.Position = UDim2.new(0, 12, 0, 8)
 MaxLabel.Size = UDim2.new(1, -24, 0, 16)
 MaxLabel.BackgroundTransparency = 1
@@ -194,9 +216,10 @@ MaxLabel.Font = Enum.Font.GothamBold
 MaxLabel.TextXAlignment = Enum.TextXAlignment.Left
 MaxLabel.TextColor3 = Color3.fromRGB(200, 200, 255)
 MaxLabel.TextSize = 12
-MaxLabel.Text = "🔢 Maximo de jugadores permitido:"
+MaxLabel.Text = "Maximo de jugadores permitido:"
 
-local MaxBox = Instance.new("TextBox", ConfigFrame)
+local MaxBox = Instance.new("TextBox")
+MaxBox.Parent = ConfigFrame
 MaxBox.Position = UDim2.new(0, 12, 0, 28)
 MaxBox.Size = UDim2.new(1, -24, 0, 22)
 MaxBox.BackgroundColor3 = Color3.fromRGB(25, 25, 45)
@@ -207,55 +230,64 @@ MaxBox.TextColor3 = Color3.fromRGB(100, 200, 255)
 MaxBox.TextSize = 16
 MaxBox.ClearTextOnFocus = false
 
-local MaxBoxCorner = Instance.new("UICorner", MaxBox)
+local MaxBoxCorner = Instance.new("UICorner")
+MaxBoxCorner.Parent = MaxBox
 MaxBoxCorner.CornerRadius = UDim.new(0, 8)
 
-local AccentLine = Instance.new("Frame", MaxBox)
+local AccentLine = Instance.new("Frame")
+AccentLine.Parent = MaxBox
 AccentLine.Position = UDim2.new(0, 0, 1, -2)
 AccentLine.Size = UDim2.new(1, 0, 0, 2)
 AccentLine.BackgroundColor3 = Color3.fromRGB(100, 150, 255)
 AccentLine.BorderSizePixel = 0
 
 -- Botones
-local ButtonFrame = Instance.new("Frame", MainFrame)
+local ButtonFrame = Instance.new("Frame")
+ButtonFrame.Parent = MainFrame
 ButtonFrame.Position = UDim2.new(0, 15, 0, 218)
 ButtonFrame.Size = UDim2.new(1, -30, 0, 50)
 ButtonFrame.BackgroundTransparency = 1
 
-local HopBtn = Instance.new("TextButton", ButtonFrame)
+local HopBtn = Instance.new("TextButton")
+HopBtn.Parent = ButtonFrame
 HopBtn.Size = UDim2.new(0.48, 0, 1, 0)
 HopBtn.BackgroundColor3 = Color3.fromRGB(80, 60, 200)
 HopBtn.BorderSizePixel = 0
 HopBtn.Font = Enum.Font.GothamBold
-HopBtn.Text = "🚀 Cambiar"
+HopBtn.Text = "Cambiar"
 HopBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 HopBtn.TextSize = 14
 HopBtn.AutoButtonColor = false
 
-local HopCorner = Instance.new("UICorner", HopBtn)
+local HopCorner = Instance.new("UICorner")
+HopCorner.Parent = HopBtn
 HopCorner.CornerRadius = UDim.new(0, 12)
 
-local HopGradient = Instance.new("UIGradient", HopBtn)
+local HopGradient = Instance.new("UIGradient")
+HopGradient.Parent = HopBtn
 HopGradient.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(0, Color3.fromRGB(100, 80, 220)),
     ColorSequenceKeypoint.new(1, Color3.fromRGB(70, 50, 180))
 })
 
-local AutoBtn = Instance.new("TextButton", ButtonFrame)
+local AutoBtn = Instance.new("TextButton")
+AutoBtn.Parent = ButtonFrame
 AutoBtn.Position = UDim2.new(0.52, 0, 0, 0)
 AutoBtn.Size = UDim2.new(0.48, 0, 1, 0)
 AutoBtn.BackgroundColor3 = Color3.fromRGB(40, 150, 90)
 AutoBtn.BorderSizePixel = 0
 AutoBtn.Font = Enum.Font.GothamBold
-AutoBtn.Text = "▶ Auto: OFF"
+AutoBtn.Text = "Auto: OFF"
 AutoBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 AutoBtn.TextSize = 14
 AutoBtn.AutoButtonColor = false
 
-local AutoCorner = Instance.new("UICorner", AutoBtn)
+local AutoCorner = Instance.new("UICorner")
+AutoCorner.Parent = AutoBtn
 AutoCorner.CornerRadius = UDim.new(0, 12)
 
-local AutoGradient = Instance.new("UIGradient", AutoBtn)
+local AutoGradient = Instance.new("UIGradient")
+AutoGradient.Parent = AutoBtn
 AutoGradient.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(0, Color3.fromRGB(50, 180, 100)),
     ColorSequenceKeypoint.new(1, Color3.fromRGB(30, 120, 70))
@@ -317,7 +349,7 @@ local function hopOnce()
     local currentCount = #Players:GetPlayers()
 
     if currentCount <= threshold then
-        StatusLabel.Text = "✓ Servidor actual tiene " .. currentCount .. " jugadores"
+        StatusLabel.Text = "Servidor actual tiene " .. currentCount .. " jugadores"
         StatusLabel.TextColor3 = Color3.fromRGB(100, 255, 150)
         return false
     end
@@ -328,12 +360,12 @@ local function hopOnce()
 
     local serverId = getRandomServer()
     if not serverId then
-        StatusLabel.Text = "❌ Error al obtener servidores"
+        StatusLabel.Text = "Error al obtener servidores"
         StatusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
         return false
     end
 
-    StatusLabel.Text = "🚀 Teletransportando..."
+    StatusLabel.Text = "Teletransportando..."
     StatusLabel.TextColor3 = Color3.fromRGB(100, 200, 255)
     task.wait(0.5)
 
@@ -342,7 +374,7 @@ local function hopOnce()
     end)
 
     if not ok then
-        StatusLabel.Text = "❌ Error: " .. tostring(err):sub(1, 40)
+        StatusLabel.Text = "Error: " .. tostring(err):sub(1, 40)
         StatusLabel.TextColor3 = Color3.fromRGB(255, 80, 80)
         return false
     end
@@ -365,7 +397,7 @@ AutoBtn.MouseButton1Click:Connect(function()
     autoEnabled = not autoEnabled
 
     if autoEnabled then
-        AutoBtn.Text = "⏸ Auto: ON"
+        AutoBtn.Text = "Auto: ON"
         AutoGradient.Color = ColorSequence.new({
             ColorSequenceKeypoint.new(0, Color3.fromRGB(220, 60, 60)),
             ColorSequenceKeypoint.new(1, Color3.fromRGB(180, 40, 40))
@@ -381,7 +413,7 @@ AutoBtn.MouseButton1Click:Connect(function()
                 local count = #Players:GetPlayers()
 
                 if count <= threshold then
-                    StatusLabel.Text = "✓ " .. count .. " jugadores - Esperando..."
+                    StatusLabel.Text = count .. " jugadores - Esperando..."
                     StatusLabel.TextColor3 = Color3.fromRGB(150, 255, 150)
                     task.wait(3)
                 else
@@ -391,7 +423,7 @@ AutoBtn.MouseButton1Click:Connect(function()
             end
         end)
     else
-        AutoBtn.Text = "▶ Auto: OFF"
+        AutoBtn.Text = "Auto: OFF"
         AutoGradient.Color = ColorSequence.new({
             ColorSequenceKeypoint.new(0, Color3.fromRGB(50, 180, 100)),
             ColorSequenceKeypoint.new(1, Color3.fromRGB(30, 120, 70))
@@ -406,6 +438,5 @@ AutoBtn.MouseButton1Click:Connect(function()
     end
 end)
 
-StatusLabel.Text = "🎮 Listo para usar - ServerHop Hub"
+StatusLabel.Text = "Listo para usar - ServerHop Hub"
 StatusLabel.TextColor3 = Color3.fromRGB(180, 180, 220)
-]==])()
