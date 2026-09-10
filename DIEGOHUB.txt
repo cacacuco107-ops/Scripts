@@ -1,4 +1,4 @@
--- Diegohub Server Hop - Diseño Moderno
+-- ServerHop Hub - Server Hop Moderno
 local Players = game:GetService("Players")
 local TeleportService = game:GetService("TeleportService")
 local HttpService = game:GetService("HttpService")
@@ -9,7 +9,7 @@ local PlaceId = game.PlaceId
 
 -- GUI Principal
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "DiegohubModern"
+ScreenGui.Name = "ServerHopHub"
 ScreenGui.ResetOnSpawn = false
 
 if syn and syn.protect_gui then
@@ -21,7 +21,7 @@ else
     ScreenGui.Parent = game.CoreGui
 end
 
--- Marco principal con efecto glassmorphism
+-- Marco principal
 local MainFrame = Instance.new("Frame")
 MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 40)
@@ -32,11 +32,9 @@ MainFrame.Size = UDim2.new(0, 320, 0, 280)
 MainFrame.Active = true
 MainFrame.Draggable = true
 
--- Esquinas redondeadas
 local Corner = Instance.new("UICorner", MainFrame)
 Corner.CornerRadius = UDim.new(0, 16)
 
--- Sombra exterior
 local Shadow = Instance.new("ImageLabel", MainFrame)
 Shadow.Name = "Shadow"
 Shadow.BackgroundTransparency = 1
@@ -49,7 +47,6 @@ Shadow.ImageTransparency = 0.4
 Shadow.ScaleType = Enum.ScaleType.Slice
 Shadow.SliceCenter = Rect.new(49, 49, 450, 450)
 
--- Degradado de fondo
 local Gradient = Instance.new("UIGradient", MainFrame)
 Gradient.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 30, 50)),
@@ -57,7 +54,7 @@ Gradient.Color = ColorSequence.new({
 })
 Gradient.Rotation = 45
 
--- Barra de título con degradado
+-- Barra de titulo
 local TitleBar = Instance.new("Frame", MainFrame)
 TitleBar.Size = UDim2.new(1, 0, 0, 45)
 TitleBar.BackgroundColor3 = Color3.fromRGB(40, 40, 70)
@@ -72,24 +69,22 @@ TitleGradient.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(1, Color3.fromRGB(60, 30, 150))
 })
 
--- Arreglar esquinas inferiores de la barra
 local TitleFix = Instance.new("Frame", TitleBar)
 TitleFix.Size = UDim2.new(1, 0, 0.5, 0)
 TitleFix.Position = UDim2.new(0, 0, 0.5, 0)
 TitleFix.BackgroundColor3 = Color3.fromRGB(40, 40, 70)
 TitleFix.BorderSizePixel = 0
 
--- Título con brillo
+-- TITULO CAMBIADO AQUI
 local Title = Instance.new("TextLabel", TitleBar)
 Title.Size = UDim2.new(1, -50, 1, 0)
 Title.Position = UDim2.new(0, 15, 0, 0)
 Title.BackgroundTransparency = 1
 Title.Font = Enum.Font.GothamBold
-Title.Text = "DIEGOHUB"
+Title.Text = "SERVERHOP HUB"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 18
 
--- Subtítulo
 local Subtitle = Instance.new("TextLabel", TitleBar)
 Subtitle.Size = UDim2.new(1, -50, 0, 20)
 Subtitle.Position = UDim2.new(0, 15, 0, 28)
@@ -99,7 +94,7 @@ Subtitle.Text = "Server Hop Premium"
 Subtitle.TextColor3 = Color3.fromRGB(200, 180, 255)
 Subtitle.TextSize = 11
 
--- Botón cerrar estilizado
+-- Boton cerrar
 local CloseBtn = Instance.new("TextButton", TitleBar)
 CloseBtn.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
 CloseBtn.Position = UDim2.new(1, -35, 0, 10)
@@ -111,9 +106,8 @@ CloseBtn.TextSize = 20
 CloseBtn.AutoButtonColor = false
 
 local CloseCorner = Instance.new("UICorner", CloseBtn)
-CloseCorner.CornerRadius = UDim.new(1, 0) -- Círculo
+CloseCorner.CornerRadius = UDim.new(1, 0)
 
--- Efecto hover para cerrar
 CloseBtn.MouseEnter:Connect(function()
     TweenService:Create(CloseBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(255, 100, 100)}):Play()
 end)
@@ -121,13 +115,12 @@ CloseBtn.MouseLeave:Connect(function()
     TweenService:Create(CloseBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(255, 70, 70)}):Play()
 end)
 CloseBtn.MouseButton1Click:Connect(function()
-    -- Animación de salida
     TweenService:Create(MainFrame, TweenInfo.new(0.3), {Size = UDim2.new(0, 0, 0, 0), Position = UDim2.new(0.5, 0, 0.5, 0)}):Play()
     task.wait(0.3)
     ScreenGui:Destroy()
 end)
 
--- Contador de jugadores con diseño moderno
+-- Contador de jugadores
 local PlayerCard = Instance.new("Frame", MainFrame)
 PlayerCard.Position = UDim2.new(0, 15, 0, 55)
 PlayerCard.Size = UDim2.new(1, -30, 0, 50)
@@ -137,7 +130,6 @@ PlayerCard.BorderSizePixel = 0
 local PlayerCardCorner = Instance.new("UICorner", PlayerCard)
 PlayerCardCorner.CornerRadius = UDim.new(0, 12)
 
--- Icono de jugadores
 local PlayerIcon = Instance.new("TextLabel", PlayerCard)
 PlayerIcon.Size = UDim2.new(0, 40, 1, 0)
 PlayerIcon.BackgroundTransparency = 1
@@ -184,7 +176,7 @@ StatusLabel.TextColor3 = Color3.fromRGB(180, 180, 220)
 StatusLabel.TextSize = 12
 StatusLabel.TextWrapped = true
 
--- Configuración
+-- Configuracion
 local ConfigFrame = Instance.new("Frame", MainFrame)
 ConfigFrame.Position = UDim2.new(0, 15, 0, 155)
 ConfigFrame.Size = UDim2.new(1, -30, 0, 55)
@@ -202,7 +194,7 @@ MaxLabel.Font = Enum.Font.GothamBold
 MaxLabel.TextXAlignment = Enum.TextXAlignment.Left
 MaxLabel.TextColor3 = Color3.fromRGB(200, 200, 255)
 MaxLabel.TextSize = 12
-MaxLabel.Text = "🔢 Máximo de jugadores permitido:"
+MaxLabel.Text = "🔢 Maximo de jugadores permitido:"
 
 local MaxBox = Instance.new("TextBox", ConfigFrame)
 MaxBox.Position = UDim2.new(0, 12, 0, 28)
@@ -218,7 +210,6 @@ MaxBox.ClearTextOnFocus = false
 local MaxBoxCorner = Instance.new("UICorner", MaxBox)
 MaxBoxCorner.CornerRadius = UDim.new(0, 8)
 
--- Línea de acento
 local AccentLine = Instance.new("Frame", MaxBox)
 AccentLine.Position = UDim2.new(0, 0, 1, -2)
 AccentLine.Size = UDim2.new(1, 0, 0, 2)
@@ -244,7 +235,6 @@ HopBtn.AutoButtonColor = false
 local HopCorner = Instance.new("UICorner", HopBtn)
 HopCorner.CornerRadius = UDim.new(0, 12)
 
--- Degradado para botón hop
 local HopGradient = Instance.new("UIGradient", HopBtn)
 HopGradient.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(0, Color3.fromRGB(100, 80, 220)),
@@ -265,14 +255,13 @@ AutoBtn.AutoButtonColor = false
 local AutoCorner = Instance.new("UICorner", AutoBtn)
 AutoCorner.CornerRadius = UDim.new(0, 12)
 
--- Degradado para botón auto
 local AutoGradient = Instance.new("UIGradient", AutoBtn)
 AutoGradient.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(0, Color3.fromRGB(50, 180, 100)),
     ColorSequenceKeypoint.new(1, Color3.fromRGB(30, 120, 70))
 })
 
--- Efectos hover para botones
+-- Efectos hover
 local function addHoverEffect(button, originalColor, hoverColor)
     button.MouseEnter:Connect(function()
         TweenService:Create(button, TweenInfo.new(0.2), {BackgroundColor3 = hoverColor}):Play()
@@ -285,19 +274,16 @@ end
 addHoverEffect(HopBtn, Color3.fromRGB(80, 60, 200), Color3.fromRGB(100, 80, 230))
 addHoverEffect(AutoBtn, Color3.fromRGB(40, 150, 90), Color3.fromRGB(50, 180, 110))
 
--- ==============================
--- LÓGICA
--- ==============================
-
+-- LOGICA
 local autoEnabled = false
 local autoThread = nil
 
--- Animación de entrada
+-- Animacion de entrada
 MainFrame.Size = UDim2.new(0, 0, 0, 0)
 MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 TweenService:Create(MainFrame, TweenInfo.new(0.4, Enum.EasingStyle.Back), {Size = UDim2.new(0, 320, 0, 280), Position = UDim2.new(0.5, -160, 0.5, -140)}):Play()
 
--- Actualizar conteo de jugadores
+-- Actualizar conteo
 task.spawn(function()
     while ScreenGui.Parent do
         local count = #Players:GetPlayers()
@@ -366,7 +352,6 @@ end
 
 HopBtn.MouseButton1Click:Connect(function()
     HopBtn.Active = false
-    -- Efecto de click
     TweenService:Create(HopBtn, TweenInfo.new(0.1), {Size = UDim2.new(0.46, 0, 0.95, 0)}):Play()
     task.wait(0.1)
     TweenService:Create(HopBtn, TweenInfo.new(0.1), {Size = UDim2.new(0.48, 0, 1, 0)}):Play()
@@ -386,7 +371,6 @@ AutoBtn.MouseButton1Click:Connect(function()
             ColorSequenceKeypoint.new(1, Color3.fromRGB(180, 40, 40))
         })
         
-        -- Efecto pulsante
         local pulseTween = TweenService:Create(AutoBtn, TweenInfo.new(0.8, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), 
             {BackgroundColor3 = Color3.fromRGB(255, 80, 80)})
         pulseTween:Play()
@@ -422,6 +406,6 @@ AutoBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- Inicialización
-StatusLabel.Text = "🎮 Listo para usar - Diegohub"
+StatusLabel.Text = "🎮 Listo para usar - ServerHop Hub"
 StatusLabel.TextColor3 = Color3.fromRGB(180, 180, 220)
+]==])()
