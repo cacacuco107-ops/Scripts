@@ -1,15 +1,14 @@
--- ServerHop Hub - Compatible con Delta
+-- ServerHop Hub - Ultimate RGB Edition (Anti-Primer Servidor Quemado)
 local Players = game:GetService("Players")
 local TeleportService = game:GetService("TeleportService")
 local HttpService = game:GetService("HttpService")
-local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
 
 local LocalPlayer = Players.LocalPlayer
 local PlaceId = game.PlaceId
 
--- GUI Principal
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "ServerHopHub"
+ScreenGui.Name = "ServerHopHubUltimateFixedV3"
 ScreenGui.ResetOnSpawn = false
 
 if syn and syn.protect_gui then
@@ -21,422 +20,345 @@ else
     ScreenGui.Parent = game.CoreGui
 end
 
--- Marco principal
 local MainFrame = Instance.new("Frame")
 MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 40)
-MainFrame.BackgroundTransparency = 0.1
+MainFrame.BackgroundColor3 = Color3.fromRGB(12, 12, 20)
+MainFrame.BackgroundTransparency = 0.15
 MainFrame.BorderSizePixel = 0
-MainFrame.Position = UDim2.new(0.5, -160, 0.5, -140)
-MainFrame.Size = UDim2.new(0, 320, 0, 280)
+MainFrame.Position = UDim2.new(0.5, -210, 0.5, -240)
+MainFrame.Size = UDim2.new(0, 420, 0, 480)
 MainFrame.Active = true
 MainFrame.Draggable = true
 
-local Corner = Instance.new("UICorner")
-Corner.Parent = MainFrame
-Corner.CornerRadius = UDim.new(0, 16)
+local MainCorner = Instance.new("UICorner")
+MainCorner.Parent = MainFrame
+MainCorner.CornerRadius = UDim.new(0, 16)
 
-local Shadow = Instance.new("ImageLabel")
-Shadow.Name = "Shadow"
-Shadow.Parent = MainFrame
-Shadow.BackgroundTransparency = 1
-Shadow.Position = UDim2.new(0, -20, 0, -20)
-Shadow.Size = UDim2.new(1, 40, 1, 40)
-Shadow.ZIndex = -1
-Shadow.Image = "rbxassetid://6015897843"
-Shadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
-Shadow.ImageTransparency = 0.4
-Shadow.ScaleType = Enum.ScaleType.Slice
-Shadow.SliceCenter = Rect.new(49, 49, 450, 450)
+local MainStroke = Instance.new("UIStroke")
+MainStroke.Parent = MainFrame
+MainStroke.Thickness = 2.5
+MainStroke.Color = Color3.fromRGB(0, 240, 255)
 
-local Gradient = Instance.new("UIGradient")
-Gradient.Parent = MainFrame
-Gradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 30, 50)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 20, 35))
+local BackgroundGlow = Instance.new("Frame")
+BackgroundGlow.Parent = MainFrame
+BackgroundGlow.Size = UDim2.new(1, 0, 1, 0)
+BackgroundGlow.BackgroundTransparency = 1
+BackgroundGlow.ZIndex = 0
+
+local BGGradient = Instance.new("UIGradient")
+BGGradient.Parent = BackgroundGlow
+BGGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 150, 255)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(40, 10, 80)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 128))
 })
-Gradient.Rotation = 45
+BGGradient.Transparency = NumberSequence.new({
+    NumberSequenceKeypoint.new(0, 0.8),
+    NumberSequenceKeypoint.new(0.5, 0.6),
+    NumberSequenceKeypoint.new(1, 0.8)
+})
+BGGradient.Rotation = 90
 
--- Barra de titulo
 local TitleBar = Instance.new("Frame")
 TitleBar.Parent = MainFrame
-TitleBar.Size = UDim2.new(1, 0, 0, 45)
-TitleBar.BackgroundColor3 = Color3.fromRGB(40, 40, 70)
+TitleBar.Size = UDim2.new(1, 0, 0, 55)
+TitleBar.BackgroundColor3 = Color3.fromRGB(18, 18, 30)
+TitleBar.BackgroundTransparency = 0.3
 TitleBar.BorderSizePixel = 0
+TitleBar.ZIndex = 2
 
 local TitleCorner = Instance.new("UICorner")
 TitleCorner.Parent = TitleBar
 TitleCorner.CornerRadius = UDim.new(0, 16)
 
-local TitleGradient = Instance.new("UIGradient")
-TitleGradient.Parent = TitleBar
-TitleGradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(100, 50, 200)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(60, 30, 150))
-})
-
 local TitleFix = Instance.new("Frame")
 TitleFix.Parent = TitleBar
 TitleFix.Size = UDim2.new(1, 0, 0.5, 0)
 TitleFix.Position = UDim2.new(0, 0, 0.5, 0)
-TitleFix.BackgroundColor3 = Color3.fromRGB(40, 40, 70)
+TitleFix.BackgroundColor3 = Color3.fromRGB(18, 18, 30)
+TitleFix.BackgroundTransparency = 0.3
 TitleFix.BorderSizePixel = 0
+TitleFix.ZIndex = 2
 
--- TITULO
-local Title = Instance.new("TextLabel")
-Title.Parent = TitleBar
-Title.Size = UDim2.new(1, -50, 1, 0)
-Title.Position = UDim2.new(0, 15, 0, 0)
-Title.BackgroundTransparency = 1
-Title.Font = Enum.Font.GothamBold
-Title.Text = "SERVERHOP HUB"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.TextSize = 18
+local TitleText = Instance.new("TextLabel")
+TitleText.Parent = TitleBar
+TitleText.Size = UDim2.new(1, -70, 1, 0)
+TitleText.Position = UDim2.new(0, 20, 0, 0)
+TitleText.BackgroundTransparency = 1
+TitleText.Font = Enum.Font.GothamBold
+TitleText.Text = "ServerHop Hub"
+TitleText.TextColor3 = Color3.fromRGB(255, 255, 255)
+TitleText.TextSize = 20
+TitleText.TextXAlignment = Enum.TextXAlignment.Left
+TitleText.ZIndex = 3
 
-local Subtitle = Instance.new("TextLabel")
-Subtitle.Parent = TitleBar
-Subtitle.Size = UDim2.new(1, -50, 0, 20)
-Subtitle.Position = UDim2.new(0, 15, 0, 28)
-Subtitle.BackgroundTransparency = 1
-Subtitle.Font = Enum.Font.Gotham
-Subtitle.Text = "Server Hop Premium"
-Subtitle.TextColor3 = Color3.fromRGB(200, 180, 255)
-Subtitle.TextSize = 11
+local TitleStroke = Instance.new("UIStroke")
+TitleStroke.Parent = TitleText
+TitleStroke.Thickness = 1
+TitleStroke.Color = Color3.fromRGB(0, 200, 255)
 
--- Boton cerrar
 local CloseBtn = Instance.new("TextButton")
 CloseBtn.Parent = TitleBar
-CloseBtn.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
-CloseBtn.Position = UDim2.new(1, -35, 0, 10)
-CloseBtn.Size = UDim2.new(0, 26, 0, 26)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(255, 40, 90)
+CloseBtn.Position = UDim2.new(1, -42, 0, 14)
+CloseBtn.Size = UDim2.new(0, 28, 0, 28)
 CloseBtn.Font = Enum.Font.GothamBold
-CloseBtn.Text = "X"
+CloseBtn.Text = "✕"
 CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-CloseBtn.TextSize = 18
-CloseBtn.AutoButtonColor = false
+CloseBtn.TextSize = 14
+CloseBtn.ZIndex = 3
 
 local CloseCorner = Instance.new("UICorner")
 CloseCorner.Parent = CloseBtn
 CloseCorner.CornerRadius = UDim.new(1, 0)
 
-CloseBtn.MouseEnter:Connect(function()
-    TweenService:Create(CloseBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(255, 100, 100)}):Play()
-end)
-CloseBtn.MouseLeave:Connect(function()
-    TweenService:Create(CloseBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(255, 70, 70)}):Play()
-end)
-CloseBtn.MouseButton1Click:Connect(function()
-    TweenService:Create(MainFrame, TweenInfo.new(0.3), {Size = UDim2.new(0, 0, 0, 0), Position = UDim2.new(0.5, 0, 0.5, 0)}):Play()
-    task.wait(0.3)
-    ScreenGui:Destroy()
-end)
+local ListContainer = Instance.new("ScrollingFrame")
+ListContainer.Parent = MainFrame
+ListContainer.Position = UDim2.new(0, 15, 0, 70)
+ListContainer.Size = UDim2.new(1, -30, 0, 230)
+ListContainer.BackgroundColor3 = Color3.fromRGB(15, 15, 25)
+ListContainer.BackgroundTransparency = 0.4
+ListContainer.BorderSizePixel = 0
+ListContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
+ListContainer.ScrollBarThickness = 5
+ListContainer.ZIndex = 2
 
--- Contador de jugadores
-local PlayerCard = Instance.new("Frame")
-PlayerCard.Parent = MainFrame
-PlayerCard.Position = UDim2.new(0, 15, 0, 55)
-PlayerCard.Size = UDim2.new(1, -30, 0, 50)
-PlayerCard.BackgroundColor3 = Color3.fromRGB(35, 35, 60)
-PlayerCard.BorderSizePixel = 0
+local ListCorner = Instance.new("UICorner")
+ListCorner.Parent = ListContainer
+ListCorner.CornerRadius = UDim.new(0, 12)
 
-local PlayerCardCorner = Instance.new("UICorner")
-PlayerCardCorner.Parent = PlayerCard
-PlayerCardCorner.CornerRadius = UDim.new(0, 12)
+local ListLayout = Instance.new("UIListLayout")
+ListLayout.Parent = ListContainer
+ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+ListLayout.Padding = UDim.new(0, 6)
 
-local PlayerIcon = Instance.new("TextLabel")
-PlayerIcon.Parent = PlayerCard
-PlayerIcon.Size = UDim2.new(0, 40, 1, 0)
-PlayerIcon.BackgroundTransparency = 1
-PlayerIcon.Font = Enum.Font.GothamBold
-PlayerIcon.Text = "P"
-PlayerIcon.TextSize = 24
-
-local NowLabel = Instance.new("TextLabel")
-NowLabel.Parent = PlayerCard
-NowLabel.Position = UDim2.new(0, 45, 0, 8)
-NowLabel.Size = UDim2.new(1, -55, 0, 18)
-NowLabel.BackgroundTransparency = 1
-NowLabel.Font = Enum.Font.GothamBold
-NowLabel.TextXAlignment = Enum.TextXAlignment.Left
-NowLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-NowLabel.TextSize = 14
-
-local PlayerCountLabel = Instance.new("TextLabel")
-PlayerCountLabel.Parent = PlayerCard
-PlayerCountLabel.Position = UDim2.new(0, 45, 0, 26)
-PlayerCountLabel.Size = UDim2.new(1, -55, 0, 16)
-PlayerCountLabel.BackgroundTransparency = 1
-PlayerCountLabel.Font = Enum.Font.Gotham
-PlayerCountLabel.TextXAlignment = Enum.TextXAlignment.Left
-PlayerCountLabel.TextColor3 = Color3.fromRGB(150, 150, 200)
-PlayerCountLabel.TextSize = 11
-PlayerCountLabel.Text = "Jugadores conectados"
-
--- Barra de estado
-local StatusBar = Instance.new("Frame")
-StatusBar.Parent = MainFrame
-StatusBar.Position = UDim2.new(0, 15, 0, 112)
-StatusBar.Size = UDim2.new(1, -30, 0, 35)
-StatusBar.BackgroundColor3 = Color3.fromRGB(30, 30, 50)
-StatusBar.BorderSizePixel = 0
+local StatusBox = Instance.new("Frame")
+StatusBox.Parent = MainFrame
+StatusBox.Position = UDim2.new(0, 15, 0, 312)
+StatusBox.Size = UDim2.new(1, -30, 0, 38)
+StatusBox.BackgroundColor3 = Color3.fromRGB(20, 20, 35)
+StatusBox.BackgroundTransparency = 0.5
+StatusBox.BorderSizePixel = 0
+StatusBox.ZIndex = 2
 
 local StatusCorner = Instance.new("UICorner")
-StatusCorner.Parent = StatusBar
+StatusCorner.Parent = StatusBox
 StatusCorner.CornerRadius = UDim.new(0, 10)
 
 local StatusLabel = Instance.new("TextLabel")
-StatusLabel.Parent = StatusBar
+StatusLabel.Parent = StatusBox
 StatusLabel.Size = UDim2.new(1, -20, 1, 0)
 StatusLabel.Position = UDim2.new(0, 10, 0, 0)
 StatusLabel.BackgroundTransparency = 1
-StatusLabel.Font = Enum.Font.Gotham
-StatusLabel.TextXAlignment = Enum.TextXAlignment.Left
-StatusLabel.TextColor3 = Color3.fromRGB(180, 180, 220)
+StatusLabel.Font = Enum.Font.GothamMedium
+StatusLabel.Text = "Sistema listo. Prueba darle a los de abajo."
+StatusLabel.TextColor3 = Color3.fromRGB(200, 220, 255)
 StatusLabel.TextSize = 12
-StatusLabel.TextWrapped = true
+StatusLabel.TextXAlignment = Enum.TextXAlignment.Left
+StatusLabel.ZIndex = 3
 
--- Configuracion
-local ConfigFrame = Instance.new("Frame")
-ConfigFrame.Parent = MainFrame
-ConfigFrame.Position = UDim2.new(0, 15, 0, 155)
-ConfigFrame.Size = UDim2.new(1, -30, 0, 55)
-ConfigFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 60)
-ConfigFrame.BorderSizePixel = 0
+local ButtonBox = Instance.new("Frame")
+ButtonBox.Parent = MainFrame
+ButtonBox.Position = UDim2.new(0, 15, 0, 362)
+ButtonBox.Size = UDim2.new(1, -30, 0, 45)
+ButtonBox.BackgroundTransparency = 1
+ButtonBox.ZIndex = 2
 
-local ConfigCorner = Instance.new("UICorner")
-ConfigCorner.Parent = ConfigFrame
-ConfigCorner.CornerRadius = UDim.new(0, 12)
+local RefreshBtn = Instance.new("TextButton")
+RefreshBtn.Parent = ButtonBox
+RefreshBtn.Size = UDim2.new(0.48, 0, 1, 0)
+RefreshBtn.BackgroundColor3 = Color3.fromRGB(0, 130, 200)
+RefreshBtn.BorderSizePixel = 0
+RefreshBtn.Font = Enum.Font.GothamBold
+RefreshBtn.Text = "🔄 Actualizar Lista"
+RefreshBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+RefreshBtn.TextSize = 13
+RefreshBtn.ZIndex = 3
 
-local MaxLabel = Instance.new("TextLabel")
-MaxLabel.Parent = ConfigFrame
-MaxLabel.Position = UDim2.new(0, 12, 0, 8)
-MaxLabel.Size = UDim2.new(1, -24, 0, 16)
-MaxLabel.BackgroundTransparency = 1
-MaxLabel.Font = Enum.Font.GothamBold
-MaxLabel.TextXAlignment = Enum.TextXAlignment.Left
-MaxLabel.TextColor3 = Color3.fromRGB(200, 200, 255)
-MaxLabel.TextSize = 12
-MaxLabel.Text = "Maximo de jugadores permitido:"
-
-local MaxBox = Instance.new("TextBox")
-MaxBox.Parent = ConfigFrame
-MaxBox.Position = UDim2.new(0, 12, 0, 28)
-MaxBox.Size = UDim2.new(1, -24, 0, 22)
-MaxBox.BackgroundColor3 = Color3.fromRGB(25, 25, 45)
-MaxBox.BorderSizePixel = 0
-MaxBox.Font = Enum.Font.GothamBold
-MaxBox.Text = "1"
-MaxBox.TextColor3 = Color3.fromRGB(100, 200, 255)
-MaxBox.TextSize = 16
-MaxBox.ClearTextOnFocus = false
-
-local MaxBoxCorner = Instance.new("UICorner")
-MaxBoxCorner.Parent = MaxBox
-MaxBoxCorner.CornerRadius = UDim.new(0, 8)
-
-local AccentLine = Instance.new("Frame")
-AccentLine.Parent = MaxBox
-AccentLine.Position = UDim2.new(0, 0, 1, -2)
-AccentLine.Size = UDim2.new(1, 0, 0, 2)
-AccentLine.BackgroundColor3 = Color3.fromRGB(100, 150, 255)
-AccentLine.BorderSizePixel = 0
-
--- Botones
-local ButtonFrame = Instance.new("Frame")
-ButtonFrame.Parent = MainFrame
-ButtonFrame.Position = UDim2.new(0, 15, 0, 218)
-ButtonFrame.Size = UDim2.new(1, -30, 0, 50)
-ButtonFrame.BackgroundTransparency = 1
-
-local HopBtn = Instance.new("TextButton")
-HopBtn.Parent = ButtonFrame
-HopBtn.Size = UDim2.new(0.48, 0, 1, 0)
-HopBtn.BackgroundColor3 = Color3.fromRGB(80, 60, 200)
-HopBtn.BorderSizePixel = 0
-HopBtn.Font = Enum.Font.GothamBold
-HopBtn.Text = "Cambiar"
-HopBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-HopBtn.TextSize = 14
-HopBtn.AutoButtonColor = false
-
-local HopCorner = Instance.new("UICorner")
-HopCorner.Parent = HopBtn
-HopCorner.CornerRadius = UDim.new(0, 12)
-
-local HopGradient = Instance.new("UIGradient")
-HopGradient.Parent = HopBtn
-HopGradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(100, 80, 220)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(70, 50, 180))
-})
+local RefreshCorner = Instance.new("UICorner")
+RefreshCorner.Parent = RefreshBtn
+RefreshCorner.CornerRadius = UDim.new(0, 10)
 
 local AutoBtn = Instance.new("TextButton")
-AutoBtn.Parent = ButtonFrame
+AutoBtn.Parent = ButtonBox
 AutoBtn.Position = UDim2.new(0.52, 0, 0, 0)
 AutoBtn.Size = UDim2.new(0.48, 0, 1, 0)
-AutoBtn.BackgroundColor3 = Color3.fromRGB(40, 150, 90)
+AutoBtn.BackgroundColor3 = Color3.fromRGB(180, 20, 100)
 AutoBtn.BorderSizePixel = 0
 AutoBtn.Font = Enum.Font.GothamBold
-AutoBtn.Text = "Auto: OFF"
+AutoBtn.Text = "⚡ Auto Hop: OFF"
 AutoBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-AutoBtn.TextSize = 14
-AutoBtn.AutoButtonColor = false
+AutoBtn.TextSize = 13
+AutoBtn.ZIndex = 3
 
 local AutoCorner = Instance.new("UICorner")
 AutoCorner.Parent = AutoBtn
-AutoCorner.CornerRadius = UDim.new(0, 12)
+AutoCorner.CornerRadius = UDim.new(0, 10)
 
-local AutoGradient = Instance.new("UIGradient")
-AutoGradient.Parent = AutoBtn
-AutoGradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(50, 180, 100)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(30, 120, 70))
-})
+local CreditLabel = Instance.new("TextLabel")
+CreditLabel.Parent = MainFrame
+CreditLabel.Position = UDim2.new(0, 15, 0, 425)
+CreditLabel.Size = UDim2.new(1, -30, 0, 25)
+CreditLabel.BackgroundTransparency = 1
+CreditLabel.Font = Enum.Font.Gotham
+CreditLabel.Text = "Los servidores del 2 en adelante evitan el error de lleno."
+CreditLabel.TextColor3 = Color3.fromRGB(150, 150, 180)
+CreditLabel.TextSize = 11
+CreditLabel.TextXAlignment = Enum.TextXAlignment.Center
+CreditLabel.ZIndex = 3
 
--- Efectos hover
-local function addHoverEffect(button, originalColor, hoverColor)
-    button.MouseEnter:Connect(function()
-        TweenService:Create(button, TweenInfo.new(0.2), {BackgroundColor3 = hoverColor}):Play()
-    end)
-    button.MouseLeave:Connect(function()
-        TweenService:Create(button, TweenInfo.new(0.2), {BackgroundColor3 = originalColor}):Play()
-    end)
-end
-
-addHoverEffect(HopBtn, Color3.fromRGB(80, 60, 200), Color3.fromRGB(100, 80, 230))
-addHoverEffect(AutoBtn, Color3.fromRGB(40, 150, 90), Color3.fromRGB(50, 180, 110))
-
--- LOGICA
-local autoEnabled = false
-local autoThread = nil
-
--- Animacion de entrada
-MainFrame.Size = UDim2.new(0, 0, 0, 0)
-MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
-TweenService:Create(MainFrame, TweenInfo.new(0.4, Enum.EasingStyle.Back), {Size = UDim2.new(0, 320, 0, 280), Position = UDim2.new(0.5, -160, 0.5, -140)}):Play()
-
--- Actualizar conteo
-task.spawn(function()
-    while ScreenGui.Parent do
-        local count = #Players:GetPlayers()
-        NowLabel.Text = tostring(count)
-        task.wait(1)
-    end
+local hue = 0
+RunService.RenderStepped:Connect(function(dt)
+    hue = (hue + dt * 0.15) % 1
+    local currentNeonColor = Color3.fromHSV(hue, 0.9, 1)
+    MainStroke.Color = currentNeonColor
+    TitleStroke.Color = currentNeonColor
 end)
 
-local function getRandomServer()
-    local url = "https://games.roblox.com/v1/games/" .. PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"
-    local ok, raw = pcall(function() return game:HttpGet(url) end)
-    if not ok or not raw or raw == "" then return nil end
-
-    local ok2, data = pcall(HttpService.JSONDecode, HttpService, raw)
-    if not ok2 or not data or not data.data or #data.data == 0 then return nil end
-
-    local currentId = tostring(game.JobId)
-    local candidates = {}
-    for _, s in ipairs(data.data) do
-        if s.id and tostring(s.id) ~= currentId then
-            table.insert(candidates, tostring(s.id))
+local function fetchAndDisplayServers()
+    for _, child in ipairs(ListContainer:GetChildren()) do
+        if child:IsA("Frame") then
+            child:Destroy()
         end
     end
-
-    if #candidates == 0 then return nil end
-    return candidates[math.random(1, #candidates)]
-end
-
-local function hopOnce()
-    local threshold = math.max(1, math.floor(tonumber(MaxBox.Text) or 1))
-    local currentCount = #Players:GetPlayers()
-
-    if currentCount <= threshold then
-        StatusLabel.Text = "Servidor actual tiene " .. currentCount .. " jugadores"
-        StatusLabel.TextColor3 = Color3.fromRGB(100, 255, 150)
-        return false
-    end
-
-    StatusLabel.Text = "Buscando servidor con menos de " .. threshold .. " jugadores..."
-    StatusLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
-    task.wait(0.5)
-
-    local serverId = getRandomServer()
-    if not serverId then
-        StatusLabel.Text = "Error al obtener servidores"
-        StatusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
-        return false
-    end
-
-    StatusLabel.Text = "Teletransportando..."
-    StatusLabel.TextColor3 = Color3.fromRGB(100, 200, 255)
-    task.wait(0.5)
-
-    local ok, err = pcall(function()
-        TeleportService:TeleportToPlaceInstance(PlaceId, serverId, LocalPlayer)
-    end)
-
-    if not ok then
-        StatusLabel.Text = "Error: " .. tostring(err):sub(1, 40)
-        StatusLabel.TextColor3 = Color3.fromRGB(255, 80, 80)
-        return false
-    end
-
-    return true
-end
-
-HopBtn.MouseButton1Click:Connect(function()
-    HopBtn.Active = false
-    TweenService:Create(HopBtn, TweenInfo.new(0.1), {Size = UDim2.new(0.46, 0, 0.95, 0)}):Play()
-    task.wait(0.1)
-    TweenService:Create(HopBtn, TweenInfo.new(0.1), {Size = UDim2.new(0.48, 0, 1, 0)}):Play()
     
-    hopOnce()
-    task.wait(2)
-    HopBtn.Active = true
-end)
+    StatusLabel.Text = "Buscando servidores estables..."
+    StatusLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
+    
+    local servers = {}
+    local success, raw = pcall(function()
+        return game:HttpGet("https://games.roblox.com/v1/games/" .. PlaceId .. "/servers/Public?sortOrder=Asc&limit=100")
+    end)
+    
+    if success and raw then
+        local decodeSuccess, data = pcall(function()
+            return HttpService:JSONDecode(raw)
+        end)
+        if decodeSuccess and data and data.data then
+            for _, s in ipairs(data.data) do
+                if s.id ~= game.JobId and type(s.playing) == "number" and type(s.maxPlayers) == "number" then
+                    -- Asegurar que tenga espacio real
+                    if s.playing < s.maxPlayers then
+                        table.insert(servers, s)
+                    end
+                end
+            end
+        end
+    end
+    
+    table.sort(servers, function(a, b)
+        return a.playing < b.playing
+    end)
+    
+    -- Opcional: si hay suficientes servidores, eliminamos el primero porque suele estar saturado
+    if #servers > 3 then
+        table.remove(servers, 1)
+    end
+    
+    if #servers > 0 then
+        StatusLabel.Text = "¡Lista cargada! Prueba del segundo en adelante."
+        StatusLabel.TextColor3 = Color3.fromRGB(100, 255, 150)
+        
+        for i, s in ipairs(servers) do
+            local ServerCard = Instance.new("Frame")
+            ServerCard.Parent = ListContainer
+            ServerCard.Size = UDim2.new(1, -10, 0, 42)
+            ServerCard.BackgroundColor3 = Color3.fromRGB(25, 25, 45)
+            ServerCard.BackgroundTransparency = 0.3
+            ServerCard.BorderSizePixel = 0
+            ServerCard.ZIndex = 3
+
+            local CardCorner = Instance.new("UICorner")
+            CardCorner.Parent = ServerCard
+            CardCorner.CornerRadius = UDim.new(0, 8)
+
+            local InfoText = Instance.new("TextLabel")
+            InfoText.Parent = ServerCard
+            InfoText.Position = UDim2.new(0, 12, 0, 0)
+            InfoText.Size = UDim2.new(0.65, 0, 1, 0)
+            InfoText.BackgroundTransparency = 1
+            InfoText.Font = Enum.Font.GothamBold
+            InfoText.Text = "#" .. i .. " 👥 Jugadores: " .. s.playing .. " / " .. s.maxPlayers
+            InfoText.TextColor3 = Color3.fromRGB(220, 220, 255)
+            InfoText.TextSize = 12
+            InfoText.TextXAlignment = Enum.TextXAlignment.Left
+            InfoText.ZIndex = 4
+
+            local JoinCardBtn = Instance.new("TextButton")
+            JoinCardBtn.Parent = ServerCard
+            JoinCardBtn.Position = UDim2.new(1, -95, 0, 7)
+            JoinCardBtn.Size = UDim2.new(0, 85, 0, 28)
+            JoinCardBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 100)
+            JoinCardBtn.BorderSizePixel = 0
+            JoinCardBtn.Font = Enum.Font.GothamBold
+            JoinCardBtn.Text = "Unirse"
+            JoinCardBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+            JoinCardBtn.TextSize = 12
+            JoinCardBtn.ZIndex = 4
+
+            local JoinCorner = Instance.new("UICorner")
+            JoinCorner.Parent = JoinCardBtn
+            JoinCorner.CornerRadius = UDim.new(0, 6)
+
+            JoinCardBtn.MouseButton1Click:Connect(function()
+                StatusLabel.Text = "Entrando al servidor #" .. i .. "..."
+                StatusLabel.TextColor3 = Color3.fromRGB(100, 255, 255)
+                pcall(function()
+                    TeleportService:TeleportToPlaceInstance(PlaceId, s.id, LocalPlayer)
+                end)
+            end)
+        end
+        
+        ListContainer.CanvasSize = UDim2.new(0, 0, 0, #servers * 48)
+    else
+        StatusLabel.Text = "Buscando servidores..."
+        task.wait(1)
+        fetchAndDisplayServers()
+    end
+end
+
+RefreshBtn.MouseButton1Click:Connect(fetchAndDisplayServers)
+
+local autoActive = false
+local autoRoutine = nil
 
 AutoBtn.MouseButton1Click:Connect(function()
-    autoEnabled = not autoEnabled
-
-    if autoEnabled then
-        AutoBtn.Text = "Auto: ON"
-        AutoGradient.Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(220, 60, 60)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(180, 40, 40))
-        })
-        
-        local pulseTween = TweenService:Create(AutoBtn, TweenInfo.new(0.8, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), 
-            {BackgroundColor3 = Color3.fromRGB(255, 80, 80)})
-        pulseTween:Play()
-
-        autoThread = task.spawn(function()
-            while autoEnabled and ScreenGui.Parent do
-                local threshold = math.max(1, math.floor(tonumber(MaxBox.Text) or 1))
-                local count = #Players:GetPlayers()
-
-                if count <= threshold then
-                    StatusLabel.Text = count .. " jugadores - Esperando..."
-                    StatusLabel.TextColor3 = Color3.fromRGB(150, 255, 150)
-                    task.wait(3)
-                else
-                    hopOnce()
-                    task.wait(5)
+    autoActive = not autoActive
+    if autoActive then
+        AutoBtn.Text = "⚡ Auto Hop: ON"
+        AutoBtn.BackgroundColor3 = Color3.fromRGB(220, 40, 40)
+        autoRoutine = task.spawn(function()
+            while autoActive do
+                local cards = {}
+                for _, child in ipairs(ListContainer:GetChildren()) do
+                    if child:IsA("Frame") then
+                        table.insert(cards, child)
+                    end
                 end
+                if #cards > 0 then
+                    -- Elige de forma aleatoria entre los servidores que están más abajo para evitar el fallo
+                    local randomCard = cards[math.random(1, #cards)]
+                    for _, obj in ipairs(randomCard:GetChildren()) do
+                        if obj:IsA("TextButton") then
+                            pcall(function() obj.MouseButton1Click:Fire() end)
+                        end
+                    end
+                else
+                    fetchAndDisplayServers()
+                end
+                task.wait(6)
             end
         end)
     else
-        AutoBtn.Text = "Auto: OFF"
-        AutoGradient.Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(50, 180, 100)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(30, 120, 70))
-        })
-        
-        if autoThread then
-            task.cancel(autoThread)
-            autoThread = nil
-        end
-        StatusLabel.Text = "Auto detenido"
-        StatusLabel.TextColor3 = Color3.fromRGB(180, 180, 220)
+        AutoBtn.Text = "⚡ Auto Hop: OFF"
+        AutoBtn.BackgroundColor3 = Color3.fromRGB(180, 20, 100)
+        if autoRoutine then task.cancel(autoRoutine) end
+        StatusLabel.Text = "Auto Hop desactivado."
     end
 end)
 
-StatusLabel.Text = "Listo para usar - ServerHop Hub"
-StatusLabel.TextColor3 = Color3.fromRGB(180, 180, 220)
+CloseBtn.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy()
+end)
+
+task.spawn(fetchAndDisplayServers)
