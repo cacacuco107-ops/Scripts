@@ -1,0 +1,611 @@
+--// 🧠 ROBAR UN BRAINROT - SCRIPT PREMIUM
+--// Compatible con Delta Executor
+--// Todo del lado del cliente (LocalPlayer)
+--// Creado por: Venice AI
+
+--// SERVICIOS
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local Workspace = game:GetService("Workspace")
+
+--// VARIABLES DEL JUGADOR
+local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local Humanoid = Character:WaitForChild("Humanoid")
+local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+
+--// ESTADO DEL SCRIPT
+local Estado = {
+    CarryActivo = false,
+    AimbotActivo = false,
+    BrainrotActual = nil,
+    Conexiones = {},
+    ObjetosGuardados = {},
+    GuiCreada = false
+}
+
+--// CONFIGURACIÓN
+local Config = {
+    DistanciaMaxima = 500,      -- Distancia máxima para detectar brainrots
+    VelocidadCarry = 100,       -- Velocidad de suavizado al cargar
+    DistanciaCarry = 3,         -- Distancia del brainrot al personaje
+    AlturaCarry = 0,            -- Altura relativa al cargar
+    ColorPrincipal = Color3.fromRGB(147, 112, 219), -- Morado brainrot
+    ColorSecundario = Color3.fromRGB(255, 105, 180), -- Rosa brainrot
+    ColorActivado = Color3.fromRGB(0, 255, 127),    -- Verde lima
+    ColorDesactivado = Color3.fromRGB(255, 69, 0)   -- Rojo naranja
+}
+
+--// FUNCIONES UTILITARIAS
+
+-- Encontrar el brainrot más cercano
+local function EncontrarBrainrotCercano()
+    local brainrotCercano = nil
+    local distanciaMinima = Config.DistanciaMaxima
+    
+    for _, objeto in pairs(Workspace:GetDescendants()) do
+        -- Detectar posibles brainrots (ajusta según el juego)
+        if objeto:IsA("BasePart") or objeto:IsA("Model") then
+            local nombre = objeto.Name:lower()
+            -- Patrones comunes de nombres de brainrots
+            if nombre:match("brainrot") or nombre:match("item") or 
+               nombre:match("loot") or nombre:match("drop") or
+               nombre:match("caja") or nombre:match("objeto") or
+               objeto:GetAttribute("Brainrot") then
+                
+                local partePrincipal = objeto:IsA("Model") and 
+                    (objeto:FindFirstChild("HumanoidRootPart") or 
+                     objeto:FindFirstChildWhichIsA("BasePart")) or objeto
+                
+                if partePrincipal then
+                    local distancia = (partePrincipal.Position - HumanoidRootPart.Position).Magnitude
+                    if distancia < distanciaMinima then
+                        distanciaMinima = distancia
+                        brainrotCercano = objeto
+                    end
+                end
+            end
+        end
+    end
+    
+    return brainrotCercano, distanciaMinima
+end
+
+-- Crear efectos de partículas
+local function CrearEfectoParticulas(posicion)
+    local particula = Instance.new("ParticleEmitter")
+    particula.Color = ColorSequence.new(Config.ColorPrincipal, Config.ColorSecundario)
+    particula.Size = NumberSequence.new(0.5, 2)
+    particula.Lifetime = NumberRange.new(0.5, 1.5)
+    particula.Rate = 50
+    particula.Speed = NumberRange.new(5, 15)
+    particula.SpreadAngle = Vector2.new(180, 180)
+    particula.Acceleration = Vector3.new(0, 10, 0)
+    particula.Transparency = NumberSequence.new(0, 1)
+    
+    local attachment = Instance.new("Attachment")
+    attachment.Position = posicion
+    attachment.Parent = Workspace.Terrain
+    
+    particula.Parent = attachment
+    
+    -- Limpiar después de un tiempo
+    task.delay(2, function()
+        particula.Enabled = false
+        task.wait(2)
+        attachment:Destroy()
+    end)
+    
+    return particula
+end
+
+-- Crear efecto de luz
+local function CrearLuzBrainrot(objeto)
+    if objeto:FindFirstChild("BrainrotLuz") then return end
+    
+    local luz = Instance.new("PointLight")
+    luz.Name = "BrainrotLuz"
+    luz.Color = Config.ColorPrincipal
+    luz.Brightness = 5
+    luz.Range = 10
+    luz.Parent = objeto:IsA("Model") and objeto:FindFirstChildWhichIsA("BasePart") or objeto
+end
+
+--// FUNCIONES PRINCIPALES
+
+-- 🦇 TELETRANSPORTE AL BRAINROT MÁS CERCANO
+local function TeletransportarBrainrot()
+    local brainrot, distancia = EncontrarBrainrotCercano()
+    
+    if brainrot then
+        local parteObjetivo = brainrot:IsA("Model") and 
+            (brainrot:FindFirstChild("HumanoidRootPart") or 
+             brainrot:FindFirstChildWhichIsA("BasePart")) or brainrot
+        
+        if parteObjetivo then
+            -- Efecto de teleporte
+            CrearEfectoParticulas(HumanoidRootPart.Position)
+            
+            -- Teletransportar 3 unidades frente al brainrot
+            local direccion = (HumanoidRootPart.Position - parteObjetivo.Position).Unit
+            local posicionDestino = parteObjetivo.Position + (direccion * 3) + Vector3.new(0, 3, 0)
+            
+            -- Usar CFrame para teleporte suave
+            local tweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+            local tween = TweenService:Create(HumanoidRootPart, tweenInfo, {
+                CFrame = CFrame.new(posicionDestino, parteObjetivo.Position)
+            })
+            tween:Play()
+            
+            -- Efecto de llegada
+            task.delay(0.3, function()
+                CrearEfectoParticulas(posicionDestino)
+            end)
+            
+            Estado.BrainrotActual = brainrot
+            return true, "Teletransportado al brainrot!"
+        end
+    end
+    
+    return false, "No se encontró ningún brainrot cercano"
+end
+
+-- 🫳 SISTEMA DE CARRY (AGARRAR Y LLEVAR)
+local function IniciarCarry()
+    if Estado.CarryActivo then return end
+    
+    local brainrot = Estado.BrainrotActual or EncontrarBrainrotCercano()
+    if not brainrot then
+        return false, "No hay brainrot para cargar"
+    end
+    
+    Estado.BrainrotActual = brainrot
+    Estado.CarryActivo = true
+    
+    local parteBrainrot = brainrot:IsA("Model") and 
+        (brainrot:FindFirstChild("HumanoidRootPart") or 
+         brainrot:FindFirstChildWhichIsA("BasePart")) or brainrot
+    
+    if not parteBrainrot then return false, "Brainrot inválido" end
+    
+    -- Crear efectos
+    CrearLuzBrainrot(brainrot)
+    CrearEfectoParticulas(parteBrainrot.Position)
+    
+    -- Sistema de carry usando BodyPosition (método clásico compatible)
+    local bodyPos = Instance.new("BodyPosition")
+    bodyPos.Name = "CarryBodyPos"
+    bodyPos.MaxForce = Vector3.new(40000, 40000, 40000)
+    bodyPos.P = 10000
+    bodyPos.D = 500
+    bodyPos.Parent = parteBrainrot
+    
+    local bodyGyro = Instance.new("BodyGyro")
+    bodyGyro.Name = "CarryBodyGyro"
+    bodyGyro.MaxTorque = Vector3.new(40000, 40000, 40000)
+    bodyGyro.P = 10000
+    bodyGyro.Parent = parteBrainrot
+    
+    -- Loop de carry
+    local conexionCarry = RunService.Heartbeat:Connect(function()
+        if not Estado.CarryActivo or not brainrot or not brainrot.Parent then
+            return
+        end
+        
+        local parte = brainrot:IsA("Model") and 
+            (brainrot:FindFirstChild("HumanoidRootPart") or 
+             brainrot:FindFirstChildWhichIsA("BasePart")) or brainrot
+        
+        if parte and bodyPos and bodyGyro then
+            -- Posición objetivo: frente al jugador
+            local offset = HumanoidRootPart.CFrame.LookVector * Config.DistanciaCarry
+            local posicionObjetivo = HumanoidRootPart.Position + offset + Vector3.new(0, Config.AlturaCarry, 0)
+            
+            bodyPos.Position = posicionObjetivo
+            bodyGyro.CFrame = HumanoidRootPart.CFrame
+        end
+    end)
+    
+    table.insert(Estado.Conexiones, conexionCarry)
+    
+    -- Animación de "agarrar"
+    if Humanoid then
+        Humanoid:LoadAnimation(Instance.new("Animation")).AnimationId = "rbxassetid://507770453"
+    end
+    
+    return true, "Carry activado - Llevando brainrot!"
+end
+
+local function DetenerCarry()
+    Estado.CarryActivo = false
+    
+    -- Limpiar BodyPositions
+    if Estado.BrainrotActual then
+        local parte = Estado.BrainrotActual:IsA("Model") and 
+            (Estado.BrainrotActual:FindFirstChild("HumanoidRootPart") or 
+             Estado.BrainrotActual:FindFirstChildWhichIsA("BasePart")) or Estado.BrainrotActual
+        
+        if parte then
+            for _, child in pairs(parte:GetChildren()) do
+                if child.Name == "CarryBodyPos" or child.Name == "CarryBodyGyro" then
+                    child:Destroy()
+                end
+            end
+        end
+    end
+    
+    -- Desconectar loops
+    for _, conn in pairs(Estado.Conexiones) do
+        if conn and conn.Connected then
+            conn:Disconnect()
+        end
+    end
+    Estado.Conexiones = {}
+    
+    return true, "Carry desactivado"
+end
+
+-- 📦 SISTEMA DE LAGER (GUARDAR EN INVENTARIO)
+local function GuardarBrainrot()
+    if not Estado.BrainrotActual then
+        return false, "No hay brainrot para guardar"
+    end
+    
+    -- Guardar referencia
+    local brainrotGuardado = Estado.BrainrotActual
+    table.insert(Estado.ObjetosGuardados, brainrotGuardado)
+    
+    -- Efecto de guardado
+    local parte = brainrotGuardado:IsA("Model") and 
+        (brainrotGuardado:FindFirstChild("HumanoidRootPart") or 
+         brainrotGuardado:FindFirstChildWhichIsA("BasePart")) or brainrotGuardado
+    
+    if parte then
+        -- Efecto de absorción
+        local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.In)
+        local tween = TweenService:Create(parte, tweenInfo, {
+            Size = Vector3.new(0.1, 0.1, 0.1),
+            Transparency = 1
+        })
+        tween:Play()
+        
+        CrearEfectoParticulas(parte.Position)
+    end
+    
+    -- Detener carry si está activo
+    if Estado.CarryActivo then
+        DetenerCarry()
+    end
+    
+    -- Mover a "Storage" (invisible, fuera del mapa)
+    brainrotGuardado:SetPrimaryPartCFrame(CFrame.new(0, -1000, 0))
+    
+    Estado.BrainrotActual = nil
+    
+    return true, "Brainrot guardado! Total: " .. #Estado.ObjetosGuardados
+end
+
+-- 🔄 RESET COMPLETO
+local function ResetCompleto()
+    -- Detener carry
+    DetenerCarry()
+    
+    -- Desactivar aimbot
+    Estado.AimbotActivo = false
+    
+    -- Limpiar brainrot actual
+    Estado.BrainrotActual = nil
+    
+    -- Soltar objetos guardados (opcional: teleportarlos de vuelta)
+    for _, obj in pairs(Estado.ObjetosGuardados) do
+        if obj and obj.Parent then
+            local parte = obj:IsA("Model") and 
+                (obj:FindFirstChild("HumanoidRootPart") or 
+                 obj:FindFirstChildWhichIsA("BasePart")) or obj
+            
+            if parte then
+                parte.Transparency = 0
+                parte.Size = parte.Size -- Resetear tamaño
+                -- Teleportar cerca del jugador
+                parte.CFrame = HumanoidRootPart.CFrame * CFrame.new(0, 0, -5)
+            end
+        end
+    end
+    
+    Estado.ObjetosGuardados = {}
+    
+    -- Resetear posición del jugador (suicidio y respawn)
+    if Humanoid then
+        Humanoid.Health = 0
+    end
+    
+    return true, "Todo reiniciado!"
+end
+
+-- 🎯 SISTEMA DE AIMBOT
+local function IniciarAimbot()
+    Estado.AimbotActivo = true
+    
+    local conexionAimbot = RunService.RenderStepped:Connect(function()
+        if not Estado.AimbotActivo then return end
+        
+        local brainrot = EncontrarBrainrotCercano()
+        if brainrot then
+            local parte = brainrot:IsA("Model") and 
+                (brainrot:FindFirstChild("HumanoidRootPart") or 
+                 brainrot:FindFirstChildWhichIsA("BasePart")) or brainrot
+            
+            if parte then
+                -- Suavizado de aim
+                local direccion = (parte.Position - HumanoidRootPart.Position).Unit
+                local anguloObjetivo = CFrame.lookAt(HumanoidRootPart.Position, parte.Position)
+                
+                HumanoidRootPart.CFrame = HumanoidRootPart.CFrame:Lerp(anguloObjetivo, 0.1)
+                
+                -- Marcar visualmente
+                if not parte:FindFirstChild("AimbotMarker") then
+                    local marker = Instance.new("BillboardGui")
+                    marker.Name = "AimbotMarker"
+                    marker.Size = UDim2.new(0, 100, 0, 100)
+                    marker.AlwaysOnTop = true
+                    marker.Parent = parte
+                    
+                    local imagen = Instance.new("ImageLabel")
+                    imagen.Size = UDim2.new(1, 0, 1, 0)
+                    imagen.BackgroundTransparency = 1
+                    imagen.Image = "rbxassetid://6883771479" -- Icono de objetivo
+                    imagen.ImageColor3 = Config.ColorSecundario
+                    imagen.Parent = marker
+                end
+            end
+        end
+    end)
+    
+    table.insert(Estado.Conexiones, conexionAimbot)
+    
+    return true, "Aimbot activado!"
+end
+
+local function DetenerAimbot()
+    Estado.AimbotActivo = false
+    
+    -- Limpiar marcadores
+    for _, obj in pairs(Workspace:GetDescendants()) do
+        if obj:FindFirstChild("AimbotMarker") then
+            obj.AimbotMarker:Destroy()
+        end
+    end
+    
+    return true, "Aimbot desactivado"
+end
+
+--// INTERFAZ GRÁFICA (GUI)
+local function CrearInterfaz()
+    if Estado.GuiCreada then return end
+    
+    -- ScreenGui principal
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "BrainrotMenuPremium"
+    screenGui.ResetOnSpawn = false -- No se borra al morir
+    screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+    
+    -- Marco principal con esquinas redondeadas
+    local marco = Instance.new("Frame")
+    marco.Name = "MarcoPrincipal"
+    marco.Size = UDim2.new(0, 280, 0, 420)
+    marco.Position = UDim2.new(0, 20, 0.5, -210)
+    marco.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+    marco.BorderSizePixel = 0
+    marco.Active = true
+    marco.Draggable = true -- Se puede mover
+    marco.Parent = screenGui
+    
+    -- Esquinas redondeadas
+    local esquinas = Instance.new("UICorner")
+    esquinas.CornerRadius = UDim.new(0, 15)
+    esquinas.Parent = marco
+    
+    -- Gradiente de fondo
+    local gradiente = Instance.new("UIGradient")
+    gradiente.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 30, 45)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(15, 15, 25))
+    })
+    gradiente.Rotation = 45
+    gradiente.Parent = marco
+    
+    -- Título estilo Brainrot
+    local titulo = Instance.new("TextLabel")
+    titulo.Name = "Titulo"
+    titulo.Size = UDim2.new(1, 0, 0, 50)
+    titulo.BackgroundTransparency = 1
+    titulo.Text = "🧠 ROBAR BRAINROT"
+    titulo.TextColor3 = Config.ColorPrincipal
+    titulo.TextSize = 24
+    titulo.Font = Enum.Font.GothamBold
+    titulo.Parent = marco
+    
+    -- Subtítulo divertido
+    local subtitulo = Instance.new("TextLabel")
+    subtitulo.Name = "Subtitulo"
+    subtitulo.Size = UDim2.new(1, 0, 0, 20)
+    subtitulo.Position = UDim2.new(0, 0, 0, 45)
+    subtitulo.BackgroundTransparency = 1
+    subtitulo.Text = "✨ Delta Executor Edition ✨"
+    subtitulo.TextColor3 = Config.ColorSecundario
+    subtitulo.TextSize = 12
+    subtitulo.Font = Enum.Font.Gotham
+    subtitulo.Parent = marco
+    
+    -- Contenedor de botones
+    local contenedor = Instance.new("Frame")
+    contenedor.Name = "ContenedorBotones"
+    contenedor.Size = UDim2.new(1, -20, 1, -80)
+    contenedor.Position = UDim2.new(0, 10, 0, 70)
+    contenedor.BackgroundTransparency = 1
+    contenedor.Parent = marco
+    
+    -- Layout automático
+    local listLayout = Instance.new("UIListLayout")
+    listLayout.Padding = UDim.new(0, 10)
+    listLayout.Parent = contenedor
+    
+    -- Función para crear botones
+    local function CrearBoton(nombre, emoji, funcionActivar, funcionDesactivar, esToggle)
+        local boton = Instance.new("TextButton")
+        boton.Name = nombre .. "Btn"
+        boton.Size = UDim2.new(1, 0, 0, 50)
+        boton.BackgroundColor3 = Config.ColorDesactivado
+        boton.Text = emoji .. " " .. nombre .. " [OFF]"
+        boton.TextColor3 = Color3.new(1, 1, 1)
+        boton.TextSize = 16
+        boton.Font = Enum.Font.GothamBold
+        boton.AutoButtonColor = true
+        boton.Parent = contenedor
+        
+        local esquinasBtn = Instance.new("UICorner")
+        esquinasBtn.CornerRadius = UDim.new(0, 10)
+        esquinasBtn.Parent = boton
+        
+        local activo = false
+        
+        boton.MouseButton1Click:Connect(function()
+            if esToggle then
+                activo = not activo
+                if activo then
+                    boton.BackgroundColor3 = Config.ColorActivado
+                    boton.Text = emoji .. " " .. nombre .. " [ON]"
+                    if funcionActivar then funcionActivar() end
+                else
+                    boton.BackgroundColor3 = Config.ColorDesactivado
+                    boton.Text = emoji .. " " .. nombre .. " [OFF]"
+                    if funcionDesactivar then funcionDesactivar() end
+                end
+            else
+                -- Efecto de click
+                local originalColor = boton.BackgroundColor3
+                boton.BackgroundColor3 = Config.ColorPrincipal
+                task.wait(0.1)
+                boton.BackgroundColor3 = originalColor
+                
+                if funcionActivar then 
+                    local success, mensaje = funcionActivar()
+                    -- Mostrar notificación
+                    print("[Brainrot]", mensaje)
+                end
+            end
+        end)
+        
+        -- Efecto hover
+        boton.MouseEnter:Connect(function()
+            TweenService:Create(boton, TweenInfo.new(0.2), {
+                Size = UDim2.new(1, 5, 0, 50)
+            }):Play()
+        end)
+        
+        boton.MouseLeave:Connect(function()
+            TweenService:Create(boton, TweenInfo.new(0.2), {
+                Size = UDim2.new(1, 0, 0, 50)
+            }):Play()
+        end)
+        
+        return boton
+    end
+    
+    -- Crear botones del menú
+    CrearBoton("TP BRAINROT", "🦇", TeletransportarBrainrot, nil, false)
+    CrearBoton("CARRY", "🫳", IniciarCarry, DetenerCarry, true)
+    CrearBoton("LAGER", "📦", GuardarBrainrot, nil, false)
+    CrearBoton("AIMBOT", "🎯", IniciarAimbot, DetenerAimbot, true)
+    CrearBoton("RESET", "🔄", ResetCompleto, nil, false)
+    
+    -- Botón de cerrar (X)
+    local cerrar = Instance.new("TextButton")
+    cerrar.Name = "Cerrar"
+    cerrar.Size = UDim2.new(0, 30, 0, 30)
+    cerrar.Position = UDim2.new(1, -35, 0, 5)
+    cerrar.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+    cerrar.Text = "X"
+    cerrar.TextColor3 = Color3.new(1, 1, 1)
+    cerrar.TextSize = 18
+    cerrar.Font = Enum.Font.GothamBold
+    cerrar.Parent = marco
+    
+    Instance.new("UICorner", cerrar).CornerRadius = UDim.new(0, 8)
+    
+    cerrar.MouseButton1Click:Connect(function()
+        screenGui:Destroy()
+        Estado.GuiCreada = false
+    end)
+    
+    -- Botón minimizar
+    local minimizar = Instance.new("TextButton")
+    minimizar.Name = "Minimizar"
+    minimizar.Size = UDim2.new(0, 30, 0, 30)
+    minimizar.Position = UDim2.new(1, -70, 0, 5)
+    minimizar.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+    minimizar.Text = "-"
+    minimizar.TextColor3 = Color3.new(1, 1, 1)
+    minimizar.TextSize = 20
+    minimizar.Font = Enum.Font.GothamBold
+    minimizar.Parent = marco
+    
+    Instance.new("UICorner", minimizar).CornerRadius = UDim.new(0, 8)
+    
+    local minimizado = false
+    minimizar.MouseButton1Click:Connect(function()
+        minimizado = not minimizado
+        contenedor.Visible = not minimizado
+        titulo.Visible = not minimizado
+        subtitulo.Visible = not minimizado
+        marco.Size = minimizado and UDim2.new(0, 280, 0, 40) or UDim2.new(0, 280, 0, 420)
+    end)
+    
+    -- Atajo de teclado (tecla P para mostrar/ocultar)
+    UserInputService.InputBegan:Connect(function(input, gameProcessed)
+        if not gameProcessed and input.KeyCode == Enum.KeyCode.P then
+            screenGui.Enabled = not screenGui.Enabled
+        end
+    end)
+    
+    Estado.GuiCreada = true
+    
+    -- Animación de entrada
+    marco.Position = UDim2.new(0, -300, 0.5, -210)
+    TweenService:Create(marco, TweenInfo.new(0.5, Enum.EasingStyle.Back), {
+        Position = UDim2.new(0, 20, 0.5, -210)
+    }):Play()
+end
+
+--// EVENTOS DE PERSONAJE
+LocalPlayer.CharacterAdded:Connect(function(newChar)
+    Character = newChar
+    Humanoid = Character:WaitForChild("Humanoid")
+    HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+    
+    -- Recrear GUI si se murió (pero ResetOnSpawn=false debería mantenerla)
+    if not Estado.GuiCreada then
+        task.wait(1)
+        CrearInterfaz()
+    end
+end)
+
+--// INICIALIZACIÓN
+print("🧠 Brainrot Script cargado!")
+print("🦇 Presiona P para mostrar/ocultar el menú")
+
+-- Crear la interfaz
+CrearInterfaz()
+
+-- Mensaje de bienvenida con efecto
+task.delay(1, function()
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "🧠 Brainrot Premium",
+        Text = "Script cargado! Delta Executor compatible",
+        Duration = 5,
+        Icon = "rbxassetid://6883771479"
+    })
+end)
