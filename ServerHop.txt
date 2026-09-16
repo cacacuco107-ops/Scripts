@@ -1,859 +1,506 @@
---// ServerHop Hub - Compact RGB Optimized
---// Menú compacto + RGB + lista optimizada
+--// ServerHop Hub - Rayfield Edition
+--// Rayfield + Server Cards + Players + Capacity + Join + Random + Auto Hop
+--// By Diego.lvarez7313
 
 local Players = game:GetService("Players")
 local TeleportService = game:GetService("TeleportService")
 local HttpService = game:GetService("HttpService")
-local RunService = game:GetService("RunService")
 
 local LocalPlayer = Players.LocalPlayer
 local PlaceId = game.PlaceId
 
 --==================================================
+-- RAYFIELD
+--==================================================
+
+local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
+
+local Window = Rayfield:CreateWindow({
+    Name = "ServerHop Hub",
+    LoadingTitle = "ServerHop Hub",
+    LoadingSubtitle = "By Diego.lvarez7313",
+    ConfigurationSaving = {
+        Enabled = false
+    },
+    Discord = {
+        Enabled = false
+    },
+    KeySystem = false
+})
+
+--==================================================
 -- CONFIG
 --==================================================
 
-local MENU_WIDTH = 350
-local MENU_HEIGHT = 390
-
 local MAX_SERVERS = 100
+local LOW_SERVER_POOL = 10
+local AUTO_HOP_DELAY = 7
+
+local currentServers = {}
+local serverCards = {}
+local loading = false
+local autoHopEnabled = false
+local autoThread = nil
 
 --==================================================
--- GUI
+-- HELPERS
 --==================================================
 
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "ServerHopHubCompactRGB"
-ScreenGui.ResetOnSpawn = false
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+local function setStatus(text)
+    if StatusLabel then
+        StatusLabel:Set(text)
+    end
+end
 
-if syn and syn.protect_gui then
-    syn.protect_gui(ScreenGui)
-    ScreenGui.Parent = game.CoreGui
-elseif gethui then
-    ScreenGui.Parent = gethui()
-else
-    ScreenGui.Parent = game.CoreGui
+local function serverText(server, index)
+    local percent = math.floor(
+        (server.playing / server.maxPlayers) * 100
+    )
+
+    return string.format(
+        "#%d | 👥 %d/%d | %d%% | ID: %s",
+        index,
+        server.playing,
+        server.maxPlayers,
+        percent,
+        tostring(server.id):sub(1, 8)
+    )
 end
 
 --==================================================
--- MAIN
+-- SERVER TAB
 --==================================================
 
-local MainFrame = Instance.new("Frame")
-MainFrame.Parent = ScreenGui
-MainFrame.Size = UDim2.fromOffset(MENU_WIDTH, MENU_HEIGHT)
-MainFrame.Position = UDim2.new(
-    0.5,
-    -MENU_WIDTH / 2,
-    0.5,
-    -MENU_HEIGHT / 2
+local ServerTab = Window:CreateTab("Servers", 4483362458)
+
+ServerTab:CreateSection("Server Finder")
+
+local ServerCountLabel = ServerTab:CreateLabel(
+    "Servidores encontrados: 0"
 )
-MainFrame.BackgroundColor3 = Color3.fromRGB(9, 9, 16)
-MainFrame.BorderSizePixel = 0
-MainFrame.Active = true
-MainFrame.Draggable = true
 
-local MainCorner = Instance.new("UICorner")
-MainCorner.Parent = MainFrame
-MainCorner.CornerRadius = UDim.new(0, 13)
-
-local MainStroke = Instance.new("UIStroke")
-MainStroke.Parent = MainFrame
-MainStroke.Thickness = 2
-
---==================================================
--- BACKGROUND
---==================================================
-
-local Background = Instance.new("Frame")
-Background.Parent = MainFrame
-Background.Size = UDim2.fromScale(1, 1)
-Background.BackgroundTransparency = 1
-Background.ZIndex = 0
-
-local BackgroundCorner = Instance.new("UICorner")
-BackgroundCorner.Parent = Background
-BackgroundCorner.CornerRadius = UDim.new(0, 13)
-
-local Gradient = Instance.new("UIGradient")
-Gradient.Parent = Background
-Gradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(
-        0,
-        Color3.fromRGB(0, 110, 255)
-    ),
-    ColorSequenceKeypoint.new(
-        0.5,
-        Color3.fromRGB(120, 0, 220)
-    ),
-    ColorSequenceKeypoint.new(
-        1,
-        Color3.fromRGB(255, 0, 130)
-    )
-})
-
-Gradient.Transparency = NumberSequence.new({
-    NumberSequenceKeypoint.new(0, 0.95),
-    NumberSequenceKeypoint.new(0.5, 0.90),
-    NumberSequenceKeypoint.new(1, 0.95)
-})
-
-Gradient.Rotation = 35
-
---==================================================
--- HEADER
---==================================================
-
-local Header = Instance.new("Frame")
-Header.Parent = MainFrame
-Header.Size = UDim2.new(1, 0, 0, 48)
-Header.BackgroundColor3 = Color3.fromRGB(15, 15, 26)
-Header.BackgroundTransparency = 0.05
-Header.BorderSizePixel = 0
-Header.ZIndex = 2
-
-local HeaderCorner = Instance.new("UICorner")
-HeaderCorner.Parent = Header
-HeaderCorner.CornerRadius = UDim.new(0, 13)
-
-local HeaderFix = Instance.new("Frame")
-HeaderFix.Parent = Header
-HeaderFix.Position = UDim2.new(0, 0, 0.5, 0)
-HeaderFix.Size = UDim2.new(1, 0, 0.5, 0)
-HeaderFix.BackgroundColor3 = Color3.fromRGB(15, 15, 26)
-HeaderFix.BorderSizePixel = 0
-HeaderFix.ZIndex = 2
-
---==================================================
--- TITLE
---==================================================
-
-local Title = Instance.new("TextLabel")
-Title.Parent = Header
-Title.Position = UDim2.fromOffset(14, 4)
-Title.Size = UDim2.new(1, -55, 0, 23)
-Title.BackgroundTransparency = 1
-Title.Font = Enum.Font.GothamBold
-Title.Text = "SERVERHOP"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.TextSize = 16
-Title.TextXAlignment = Enum.TextXAlignment.Left
-Title.ZIndex = 3
-
-local TitleStroke = Instance.new("UIStroke")
-TitleStroke.Parent = Title
-TitleStroke.Thickness = 0.8
-
-local Subtitle = Instance.new("TextLabel")
-Subtitle.Parent = Header
-Subtitle.Position = UDim2.fromOffset(15, 26)
-Subtitle.Size = UDim2.new(1, -60, 0, 15)
-Subtitle.BackgroundTransparency = 1
-Subtitle.Font = Enum.Font.Gotham
-Subtitle.Text = "RGB • Public Servers"
-Subtitle.TextColor3 = Color3.fromRGB(155, 165, 195)
-Subtitle.TextSize = 8
-Subtitle.TextXAlignment = Enum.TextXAlignment.Left
-Subtitle.ZIndex = 3
-
---==================================================
--- CLOSE
---==================================================
-
-local Close = Instance.new("TextButton")
-Close.Parent = Header
-Close.Position = UDim2.new(1, -36, 0, 10)
-Close.Size = UDim2.fromOffset(26, 26)
-Close.BackgroundColor3 = Color3.fromRGB(235, 45, 85)
-Close.BorderSizePixel = 0
-Close.Font = Enum.Font.GothamBold
-Close.Text = "×"
-Close.TextColor3 = Color3.fromRGB(255, 255, 255)
-Close.TextSize = 17
-Close.ZIndex = 5
-
-local CloseCorner = Instance.new("UICorner")
-CloseCorner.Parent = Close
-CloseCorner.CornerRadius = UDim.new(1, 0)
-
---==================================================
--- SERVER COUNT
---==================================================
-
-local ServerCount = Instance.new("TextLabel")
-ServerCount.Parent = MainFrame
-ServerCount.Position = UDim2.fromOffset(13, 54)
-ServerCount.Size = UDim2.new(1, -26, 0, 18)
-ServerCount.BackgroundTransparency = 1
-ServerCount.Font = Enum.Font.GothamBold
-ServerCount.Text = "SERVIDORES: 0"
-ServerCount.TextColor3 = Color3.fromRGB(190, 200, 225)
-ServerCount.TextSize = 9
-ServerCount.TextXAlignment = Enum.TextXAlignment.Left
-ServerCount.ZIndex = 3
+local StatusLabel = ServerTab:CreateLabel(
+    "Estado: Iniciando..."
+)
 
 --==================================================
 -- SERVER LIST
 --==================================================
 
-local ServerList = Instance.new("ScrollingFrame")
-ServerList.Parent = MainFrame
-ServerList.Position = UDim2.fromOffset(10, 77)
-ServerList.Size = UDim2.new(1, -20, 0, 224)
-ServerList.BackgroundColor3 = Color3.fromRGB(6, 6, 12)
-ServerList.BackgroundTransparency = 0.10
-ServerList.BorderSizePixel = 0
-ServerList.CanvasSize = UDim2.fromOffset(0, 0)
-ServerList.ScrollBarThickness = 4
-ServerList.ScrollBarImageColor3 = Color3.fromRGB(130, 130, 150)
-ServerList.ScrollingDirection = Enum.ScrollingDirection.Y
-ServerList.ZIndex = 2
+local ServerDropdown = ServerTab:CreateDropdown({
+    Name = "Seleccionar servidor",
+    Options = {"Pulsa Actualizar"},
+    CurrentOption = {"Pulsa Actualizar"},
+    MultipleOptions = false,
 
-local ListCorner = Instance.new("UICorner")
-ListCorner.Parent = ServerList
-ListCorner.CornerRadius = UDim.new(0, 10)
+    Callback = function(option)
+        if type(option) == "table" then
+            option = option[1]
+        end
 
-local Padding = Instance.new("UIPadding")
-Padding.Parent = ServerList
-Padding.PaddingTop = UDim.new(0, 5)
-Padding.PaddingBottom = UDim.new(0, 5)
-Padding.PaddingLeft = UDim.new(0, 5)
-Padding.PaddingRight = UDim.new(0, 5)
-
-local Layout = Instance.new("UIListLayout")
-Layout.Parent = ServerList
-Layout.SortOrder = Enum.SortOrder.LayoutOrder
-Layout.Padding = UDim.new(0, 5)
-
---==================================================
--- STATUS
---==================================================
-
-local Status = Instance.new("Frame")
-Status.Parent = MainFrame
-Status.Position = UDim2.fromOffset(10, 309)
-Status.Size = UDim2.new(1, -20, 0, 27)
-Status.BackgroundColor3 = Color3.fromRGB(17, 17, 28)
-Status.BackgroundTransparency = 0.08
-Status.BorderSizePixel = 0
-Status.ZIndex = 3
-
-local StatusCorner = Instance.new("UICorner")
-StatusCorner.Parent = Status
-StatusCorner.CornerRadius = UDim.new(0, 7)
-
-local StatusText = Instance.new("TextLabel")
-StatusText.Parent = Status
-StatusText.Position = UDim2.fromOffset(8, 0)
-StatusText.Size = UDim2.new(1, -16, 1, 0)
-StatusText.BackgroundTransparency = 1
-StatusText.Font = Enum.Font.GothamMedium
-StatusText.Text = "Iniciando..."
-StatusText.TextColor3 = Color3.fromRGB(190, 200, 225)
-StatusText.TextSize = 8
-StatusText.TextXAlignment = Enum.TextXAlignment.Left
-StatusText.TextTruncate = Enum.TextTruncate.AtEnd
-StatusText.ZIndex = 4
-
---==================================================
--- BUTTON CONTAINER
---==================================================
-
-local Buttons = Instance.new("Frame")
-Buttons.Parent = MainFrame
-Buttons.Position = UDim2.fromOffset(10, 344)
-Buttons.Size = UDim2.new(1, -20, 0, 34)
-Buttons.BackgroundTransparency = 1
-Buttons.ZIndex = 3
-
---==================================================
--- REFRESH BUTTON
---==================================================
-
-local Refresh = Instance.new("TextButton")
-Refresh.Parent = Buttons
-Refresh.Size = UDim2.new(0.485, 0, 1, 0)
-Refresh.BackgroundColor3 = Color3.fromRGB(20, 115, 235)
-Refresh.BorderSizePixel = 0
-Refresh.Font = Enum.Font.GothamBold
-Refresh.Text = "↻  ACTUALIZAR"
-Refresh.TextColor3 = Color3.fromRGB(255, 255, 255)
-Refresh.TextSize = 9
-Refresh.ZIndex = 4
-
-local RefreshCorner = Instance.new("UICorner")
-RefreshCorner.Parent = Refresh
-RefreshCorner.CornerRadius = UDim.new(0, 8)
-
---==================================================
--- AUTO HOP
---==================================================
-
-local AutoHop = Instance.new("TextButton")
-AutoHop.Parent = Buttons
-AutoHop.Position = UDim2.new(0.515, 0, 0, 0)
-AutoHop.Size = UDim2.new(0.485, 0, 1, 0)
-AutoHop.BackgroundColor3 = Color3.fromRGB(145, 30, 120)
-AutoHop.BorderSizePixel = 0
-AutoHop.Font = Enum.Font.GothamBold
-AutoHop.Text = "⚡ AUTO: OFF"
-AutoHop.TextColor3 = Color3.fromRGB(255, 255, 255)
-AutoHop.TextSize = 9
-AutoHop.ZIndex = 4
-
-local AutoCorner = Instance.new("UICorner")
-AutoCorner.Parent = AutoHop
-AutoCorner.CornerRadius = UDim.new(0, 8)
-
---==================================================
--- RGB ENGINE
---==================================================
-
-local hue = 0
-
-RunService.RenderStepped:Connect(function(delta)
-
-    hue = (hue + delta * 0.10) % 1
-
-    local rgb = Color3.fromHSV(
-        hue,
-        0.85,
-        1
-    )
-
-    MainStroke.Color = rgb
-    TitleStroke.Color = rgb
-
-end)
-
---==================================================
--- CREATE SERVER CARD
---==================================================
-
-local function createServerCard(server, index)
-
-    local Card = Instance.new("Frame")
-    Card.Parent = ServerList
-    Card.Size = UDim2.new(1, -1, 0, 49)
-    Card.BackgroundColor3 = Color3.fromRGB(17, 17, 29)
-    Card.BackgroundTransparency = 0.03
-    Card.BorderSizePixel = 0
-    Card.LayoutOrder = index
-    Card.ZIndex = 3
-
-    local Corner = Instance.new("UICorner")
-    Corner.Parent = Card
-    Corner.CornerRadius = UDim.new(0, 8)
-
-    local Stroke = Instance.new("UIStroke")
-    Stroke.Parent = Card
-    Stroke.Thickness = 1
-
-    -- Número
-    local Number = Instance.new("TextLabel")
-    Number.Parent = Card
-    Number.Position = UDim2.fromOffset(7, 6)
-    Number.Size = UDim2.fromOffset(27, 18)
-    Number.BackgroundTransparency = 1
-    Number.Font = Enum.Font.GothamBold
-    Number.Text = "#" .. index
-    Number.TextColor3 = Color3.fromRGB(135, 145, 175)
-    Number.TextSize = 8
-    Number.ZIndex = 4
-
-    -- Jugadores
-    local PlayersText = Instance.new("TextLabel")
-    PlayersText.Parent = Card
-    PlayersText.Position = UDim2.fromOffset(36, 5)
-    PlayersText.Size = UDim2.fromOffset(95, 19)
-    PlayersText.BackgroundTransparency = 1
-    PlayersText.Font = Enum.Font.GothamBold
-    PlayersText.Text =
-        "👥 " .. server.playing .. "/" .. server.maxPlayers
-    PlayersText.TextColor3 = Color3.fromRGB(235, 235, 250)
-    PlayersText.TextSize = 9
-    PlayersText.TextXAlignment = Enum.TextXAlignment.Left
-    PlayersText.ZIndex = 4
-
-    -- Porcentaje
-    local percent = math.floor(
-        (server.playing / server.maxPlayers) * 100
-    )
-
-    local PercentText = Instance.new("TextLabel")
-    PercentText.Parent = Card
-    PercentText.Position = UDim2.fromOffset(36, 25)
-    PercentText.Size = UDim2.fromOffset(80, 13)
-    PercentText.BackgroundTransparency = 1
-    PercentText.Font = Enum.Font.Gotham
-    PercentText.Text = percent .. "%"
-    PercentText.TextColor3 = Color3.fromRGB(145, 155, 180)
-    PercentText.TextSize = 7
-    PercentText.TextXAlignment = Enum.TextXAlignment.Left
-    PercentText.ZIndex = 4
-
-    -- Barra
-    local BarBG = Instance.new("Frame")
-    BarBG.Parent = Card
-    BarBG.Position = UDim2.fromOffset(76, 29)
-    BarBG.Size = UDim2.fromOffset(70, 4)
-    BarBG.BackgroundColor3 = Color3.fromRGB(35, 35, 48)
-    BarBG.BorderSizePixel = 0
-    BarBG.ZIndex = 4
-
-    local BarBGCorner = Instance.new("UICorner")
-    BarBGCorner.Parent = BarBG
-    BarBGCorner.CornerRadius = UDim.new(1, 0)
-
-    local Bar = Instance.new("Frame")
-    Bar.Parent = BarBG
-    Bar.Size = UDim2.new(
-        math.clamp(
-            server.playing / server.maxPlayers,
-            0,
-            1
-        ),
-        0,
-        1,
-        0
-    )
-    Bar.BorderSizePixel = 0
-    Bar.ZIndex = 5
-
-    local BarCorner = Instance.new("UICorner")
-    BarCorner.Parent = Bar
-    BarCorner.CornerRadius = UDim.new(1, 0)
-
-    -- Color según ocupación
-    local barHue = math.clamp(
-        0.36 - (percent / 100) * 0.36,
-        0,
-        0.36
-    )
-
-    Bar.BackgroundColor3 = Color3.fromHSV(
-        barHue,
-        0.85,
-        1
-    )
-
-    -- Botón unirse
-    local Join = Instance.new("TextButton")
-    Join.Parent = Card
-    Join.Position = UDim2.new(1, -72, 0.5, -14)
-    Join.Size = UDim2.fromOffset(64, 28)
-    Join.BackgroundColor3 = Color3.fromRGB(20, 175, 105)
-    Join.BorderSizePixel = 0
-    Join.Font = Enum.Font.GothamBold
-    Join.Text = "UNIRSE"
-    Join.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Join.TextSize = 8
-    Join.ZIndex = 5
-
-    local JoinCorner = Instance.new("UICorner")
-    JoinCorner.Parent = Join
-    JoinCorner.CornerRadius = UDim.new(0, 7)
-
-    -- Hover
-    Join.MouseEnter:Connect(function()
-
-        Join.BackgroundColor3 =
-            Color3.fromRGB(30, 215, 125)
-
-    end)
-
-    Join.MouseLeave:Connect(function()
-
-        Join.BackgroundColor3 =
-            Color3.fromRGB(20, 175, 105)
-
-    end)
-
-    -- Teleport
-    Join.MouseButton1Click:Connect(function()
-
-        if not server.id then
+        if not option then
             return
         end
 
-        StatusText.Text =
-            "Entrando al servidor #" .. index .. "..."
+        local index = tonumber(
+            string.match(option, "^#(%d+)")
+        )
 
-        StatusText.TextColor3 =
-            Color3.fromRGB(100, 230, 255)
+        if index and currentServers[index] then
+            local server = currentServers[index]
 
-        local success = pcall(function()
+            setStatus(
+                "🚀 Entrando: "
+                .. server.playing
+                .. "/"
+                .. server.maxPlayers
+            )
 
+            pcall(function()
+                TeleportService:TeleportToPlaceInstance(
+                    PlaceId,
+                    server.id,
+                    LocalPlayer
+                )
+            end)
+        end
+    end
+})
+
+--==================================================
+-- SERVER LIST
+--==================================================
+
+local selectedServerIndex = nil
+
+local ServerDropdown = ServerTab:CreateDropdown({
+    Name = "📋 LISTA DE SERVIDORES",
+    Options = {"Pulsa ACTUALIZAR"},
+    CurrentOption = {"Pulsa ACTUALIZAR"},
+    MultipleOptions = false,
+
+    Callback = function(option)
+        if type(option) == "table" then
+            option = option[1]
+        end
+
+        if not option then
+            return
+        end
+
+        local index = tonumber(
+            string.match(option, "^#(%d+)")
+        )
+
+        if index and currentServers[index] then
+            selectedServerIndex = index
+
+            local server = currentServers[index]
+
+            setStatus(
+                string.format(
+                    "📌 Seleccionado #%d → 👥 %d/%d",
+                    index,
+                    server.playing,
+                    server.maxPlayers
+                )
+            )
+        end
+    end
+})
+
+ServerTab:CreateButton({
+    Name = "🚀 UNIRSE AL SERVIDOR SELECCIONADO",
+
+    Callback = function()
+        if not selectedServerIndex
+            or not currentServers[selectedServerIndex]
+        then
+            setStatus("⚠️ Primero selecciona un servidor")
+            return
+        end
+
+        local server = currentServers[selectedServerIndex]
+
+        setStatus(
+            "🚀 Entrando al servidor #"
+            .. selectedServerIndex
+            .. " (" .. server.playing .. "/" .. server.maxPlayers .. ")..."
+        )
+
+        local success, err = pcall(function()
             TeleportService:TeleportToPlaceInstance(
                 PlaceId,
                 server.id,
                 LocalPlayer
             )
-
         end)
 
         if not success then
-
-            StatusText.Text =
-                "No se pudo entrar al servidor."
-
-            StatusText.TextColor3 =
-                Color3.fromRGB(255, 100, 110)
-
+            setStatus("❌ Error al teletransportar")
+            warn(err)
         end
+    end
+})
 
-    end)
+local function updateServerList()
+    local options = {}
 
-    -- RGB suave de cada tarjeta
-    task.spawn(function()
+    for index, server in ipairs(currentServers) do
+        local percent = math.floor(
+            (server.playing / server.maxPlayers) * 100
+        )
 
-        local cardHue =
-            (hue + index * 0.055) % 1
-
-        while Card.Parent do
-
-            cardHue =
-                (cardHue + 0.003) % 1
-
-            Stroke.Color =
-                Color3.fromHSV(
-                    cardHue,
-                    0.65,
-                    1
-                )
-
-            task.wait(0.04)
-
-        end
-
-    end)
-
-end
-
---==================================================
--- CLEAR LIST
---==================================================
-
-local function clearServerList()
-
-    for _, child in ipairs(
-        ServerList:GetChildren()
-    ) do
-
-        if child:IsA("Frame") then
-            child:Destroy()
-        end
-
+        table.insert(
+            options,
+            string.format(
+                "#%d | 👥 %d/%d | %d%%",
+                index,
+                server.playing,
+                server.maxPlayers,
+                percent
+            )
+        )
     end
 
-    ServerList.CanvasPosition =
-        Vector2.new(0, 0)
+    if #options == 0 then
+        options = {"No hay servidores disponibles"}
+    end
 
+    ServerDropdown:Refresh(options)
+    selectedServerIndex = nil
 end
 
 --==================================================
--- SERVER FETCH
+-- FETCH SERVERS
 --==================================================
 
-local loading = false
-
 local function fetchServers()
-
     if loading then
         return
     end
 
     loading = true
+    setStatus("🔎 Buscando servidores...")
+    ServerCountLabel:Set("Servidores encontrados: ...")
 
-    clearServerList()
-
-    ServerCount.Text =
-        "SERVIDORES: ..."
-
-    StatusText.Text =
-        "🔎 Buscando servidores..."
-
-    StatusText.TextColor3 =
-        Color3.fromRGB(255, 210, 100)
-
-    local servers = {}
+    currentServers = {}
 
     local success, result = pcall(function()
-
         return game:HttpGet(
             "https://games.roblox.com/v1/games/"
             .. PlaceId
             .. "/servers/Public?sortOrder=Asc&limit="
             .. MAX_SERVERS
         )
-
     end)
 
-    if success and result then
-
-        local decoded, data =
-            pcall(function()
-
-                return HttpService:JSONDecode(result)
-
-            end)
-
-        if decoded
-            and type(data) == "table"
-            and type(data.data) == "table"
-        then
-
-            for _, server in ipairs(data.data) do
-
-                if
-                    server.id
-                    and server.id ~= game.JobId
-                    and type(server.playing) == "number"
-                    and type(server.maxPlayers) == "number"
-                    and server.maxPlayers > 0
-                    and server.playing < server.maxPlayers
-                then
-
-                    table.insert(
-                        servers,
-                        server
-                    )
-
-                end
-
-            end
-
-        end
-
-    end
-
-    -- Servidores con menos gente primero
-    table.sort(
-        servers,
-        function(a, b)
-
-            local aPercent =
-                a.playing / a.maxPlayers
-
-            local bPercent =
-                b.playing / b.maxPlayers
-
-            if aPercent == bPercent then
-                return a.playing < b.playing
-            end
-
-            return aPercent < bPercent
-
-        end
-    )
-
-    if #servers == 0 then
-
-        ServerCount.Text =
-            "SERVIDORES: 0"
-
-        StatusText.Text =
-            "No hay servidores disponibles."
-
-        StatusText.TextColor3 =
-            Color3.fromRGB(255, 100, 110)
-
+    if not success or not result then
+        setStatus("❌ No se pudo obtener la lista")
+        ServerCountLabel:Set("Servidores encontrados: 0")
         loading = false
         return
-
     end
 
-    ServerCount.Text =
-        "SERVIDORES: " .. #servers
-
-    StatusText.Text =
-        "✓ Servidores ordenados por ocupación"
-
-    StatusText.TextColor3 =
-        Color3.fromRGB(100, 255, 150)
-
-    for index, server in ipairs(servers) do
-
-        createServerCard(
-            server,
-            index
-        )
-
-    end
-
-    task.defer(function()
-
-        ServerList.CanvasSize =
-            UDim2.fromOffset(
-                0,
-                Layout.AbsoluteContentSize.Y + 10
-            )
-
+    local decoded, data = pcall(function()
+        return HttpService:JSONDecode(result)
     end)
 
-    loading = false
+    if not decoded
+        or type(data) ~= "table"
+        or type(data.data) ~= "table"
+    then
+        setStatus("❌ Respuesta inválida")
+        ServerCountLabel:Set("Servidores encontrados: 0")
+        loading = false
+        return
+    end
 
+    for _, server in ipairs(data.data) do
+        if
+            server.id
+            and server.id ~= game.JobId
+            and type(server.playing) == "number"
+            and type(server.maxPlayers) == "number"
+            and server.maxPlayers > 0
+            and server.playing < server.maxPlayers
+        then
+            table.insert(currentServers, server)
+        end
+    end
+
+    table.sort(currentServers, function(a, b)
+        local aPercent = a.playing / a.maxPlayers
+        local bPercent = b.playing / b.maxPlayers
+
+        if aPercent == bPercent then
+            return a.playing < b.playing
+        end
+
+        return aPercent < bPercent
+    end)
+
+    ServerCountLabel:Set(
+        "Servidores encontrados: "
+        .. #currentServers
+    )
+
+    if #currentServers == 0 then
+        setStatus("⚠️ No hay servidores disponibles")
+        loading = false
+        return
+    end
+
+    setStatus(
+        "✅ Ordenados por menor ocupación"
+    )
+
+    updateServerList()
+
+    loading = false
 end
 
 --==================================================
 -- REFRESH
 --==================================================
 
-Refresh.MouseButton1Click:Connect(function()
+ServerTab:CreateButton({
+    Name = "🔄 ACTUALIZAR SERVIDORES",
 
-    fetchServers()
+    Callback = function()
+        fetchServers()
+    end
+})
 
-end)
+--==================================================
+-- RANDOM
+--==================================================
+
+ServerTab:CreateButton({
+    Name = "🎲 SERVIDOR ALEATORIO",
+
+    Callback = function()
+        if #currentServers == 0 then
+            fetchServers()
+        end
+
+        if #currentServers > 0 then
+            local server = currentServers[
+                math.random(1, #currentServers)
+            ]
+
+            setStatus("🎲 Entrando a servidor aleatorio...")
+
+            pcall(function()
+                TeleportService:TeleportToPlaceInstance(
+                    PlaceId,
+                    server.id,
+                    LocalPlayer
+                )
+            end)
+        else
+            setStatus("⚠️ No hay servidores")
+        end
+    end
+})
+
+--==================================================
+-- LOW PLAYER
+--==================================================
+
+ServerTab:CreateButton({
+    Name = "🎯 SERVIDOR CON POCA GENTE",
+
+    Callback = function()
+        if #currentServers == 0 then
+            fetchServers()
+        end
+
+        if #currentServers == 0 then
+            setStatus("⚠️ No hay servidores")
+            return
+        end
+
+        local amount = math.min(
+            LOW_SERVER_POOL,
+            #currentServers
+        )
+
+        local server = currentServers[
+            math.random(1, amount)
+        ]
+
+        setStatus(
+            "🎯 Buscando servidor de baja ocupación..."
+        )
+
+        pcall(function()
+            TeleportService:TeleportToPlaceInstance(
+                PlaceId,
+                server.id,
+                LocalPlayer
+            )
+        end)
+    end
+})
 
 --==================================================
 -- AUTO HOP
 --==================================================
 
-local autoHopEnabled = false
-local autoThread = nil
+ServerTab:CreateToggle({
+    Name = "⚡ AUTO HOP",
+    CurrentValue = false,
 
-local function setAutoHop(state)
+    Callback = function(value)
+        autoHopEnabled = value
 
-    autoHopEnabled = state
-
-    if state then
-
-        AutoHop.Text =
-            "⚡ AUTO: ON"
-
-        AutoHop.BackgroundColor3 =
-            Color3.fromRGB(220, 40, 80)
-
-        StatusText.Text =
-            "Auto Hop activado."
-
-        StatusText.TextColor3 =
-            Color3.fromRGB(255, 150, 180)
-
-    else
-
-        AutoHop.Text =
-            "⚡ AUTO: OFF"
-
-        AutoHop.BackgroundColor3 =
-            Color3.fromRGB(145, 30, 120)
-
-        StatusText.Text =
-            "Auto Hop desactivado."
-
-        StatusText.TextColor3 =
-            Color3.fromRGB(190, 200, 225)
-
-    end
-
-end
-
-AutoHop.MouseButton1Click:Connect(function()
-
-    setAutoHop(not autoHopEnabled)
-
-    if not autoHopEnabled then
-
-        if autoThread then
-
-            task.cancel(autoThread)
-            autoThread = nil
-
-        end
-
-        return
-
-    end
-
-    autoThread = task.spawn(function()
-
-        while autoHopEnabled do
-
-            local available = {}
-
-            for _, child in ipairs(
-                ServerList:GetChildren()
-            ) do
-
-                if child:IsA("Frame") then
-
-                    local button =
-                        child:FindFirstChildWhichIsA(
-                            "TextButton"
-                        )
-
-                    if button then
-                        table.insert(
-                            available,
-                            button
-                        )
-                    end
-
-                end
-
+        if not value then
+            if autoThread then
+                task.cancel(autoThread)
+                autoThread = nil
             end
 
-            if #available == 0 then
+            setStatus("Auto Hop: OFF")
+            return
+        end
 
-                fetchServers()
+        setStatus("⚡ Auto Hop: ON")
 
-                task.wait(3)
+        autoThread = task.spawn(function()
+            while autoHopEnabled do
+                if #currentServers == 0 then
+                    fetchServers()
+                end
 
-            else
+                if #currentServers > 0 then
+                    local amount = math.min(
+                        LOW_SERVER_POOL,
+                        #currentServers
+                    )
 
-                local button =
-                    available[
-                        math.random(
-                            1,
-                            #available
-                        )
+                    local server = currentServers[
+                        math.random(1, amount)
                     ]
 
-                if button then
+                    setStatus(
+                        "⚡ Auto Hop → "
+                        .. server.playing
+                        .. "/"
+                        .. server.maxPlayers
+                    )
 
                     pcall(function()
-                        button:Activate()
+                        TeleportService:TeleportToPlaceInstance(
+                            PlaceId,
+                            server.id,
+                            LocalPlayer
+                        )
                     end)
 
+                    task.wait(AUTO_HOP_DELAY)
+                else
+                    task.wait(3)
                 end
-
-                task.wait(6)
-
             end
-
-        end
-
-    end)
-
-end)
-
---==================================================
--- CLOSE
---==================================================
-
-Close.MouseButton1Click:Connect(function()
-
-    if autoThread then
-
-        autoHopEnabled = false
-        task.cancel(autoThread)
-        autoThread = nil
-
+        end)
     end
+})
 
-    ScreenGui:Destroy()
+--==================================================
+-- INFO TAB
+--==================================================
 
-end)
+local InfoTab = Window:CreateTab("Info", 4483362458)
+
+InfoTab:CreateSection("ServerHop Hub")
+
+InfoTab:CreateParagraph({
+    Title = "ServerHop Hub",
+    Content =
+        "Servidor público finder.\n\n"
+        .. "• Hasta 100 servidores\n"
+        .. "• Menor ocupación primero\n"
+        .. "• Jugadores / capacidad\n"
+        .. "• Porcentaje de ocupación\n"
+        .. "• Unirse desde la lista\n"
+        .. "• Servidor aleatorio\n"
+        .. "• Servidor con poca gente\n"
+        .. "• Auto Hop\n\n"
+        .. "By Diego.lvarez7313"
+})
 
 --==================================================
 -- START
 --==================================================
 
 task.spawn(function()
-
-    task.wait(0.4)
-
+    task.wait(1)
     fetchServers()
-
 end)
+
+Rayfield:Notify({
+    Title = "ServerHop Hub",
+    Content = "Rayfield cargado correctamente.",
+    Duration = 5
+})
