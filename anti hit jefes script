@@ -1,0 +1,558 @@
+local v0=game:GetService("Players");
+local v1=game:GetService("ProximityPromptService");
+local v2=game:GetService("RunService");
+local v3=game:GetService("TweenService");
+local v4=game:GetService("UserInputService");
+local v5=v0.LocalPlayer;
+local v6=v5:WaitForChild("PlayerGui");
+local v7="rbxassetid://73031175768679";
+local v8=true;
+local v9=false;
+local v10=true;
+
+local v11={
+Vector3.new(500.62,70.28,-366.64),
+Vector3.new(508.3,70.28,-366.03),
+Vector3.new(519.43,70.28,-366.47),
+Vector3.new(529.22,70.28,-366.71),
+Vector3.new(546.8,70.28,-364.4)
+};
+
+local v12=v6:FindFirstChild("NEXORA_HUB");
+if v12 then
+v12:Destroy();
+end
+
+local v13=Instance.new("ScreenGui");
+v13.Name="NEXORA_HUB";
+v13.ResetOnSpawn=false;
+v13.IgnoreGuiInset=true;
+v13.ZIndexBehavior=Enum.ZIndexBehavior.Sibling;
+v13.Parent=v6;
+
+local v20=Instance.new("ImageButton");
+v20.Name="NEXORA_FLOAT";
+v20.Size=UDim2.fromOffset(54,54);
+v20.Position=UDim2.new(1,-68,0,16);
+v20.BackgroundColor3=Color3.fromRGB(2,2,2);
+v20.BorderSizePixel=0;
+v20.Image=v7;
+v20.ScaleType=Enum.ScaleType.Crop;
+v20.ZIndex=200;
+v20.Parent=v13;
+
+local v31=Instance.new("UICorner");
+v31.CornerRadius=UDim.new(1,0);
+v31.Parent=v20;
+
+local v34=Instance.new("UIStroke");
+v34.Thickness=2;
+v34.Color=Color3.fromRGB(255,255,255);
+v34.Parent=v20;
+
+local v38=Instance.new("Frame");
+v38.Name="NEXORA_PANEL";
+v38.Size=UDim2.fromOffset(255,175);
+v38.Position=UDim2.new(1,-265,0,76);
+v38.BackgroundColor3=Color3.fromRGB(2,2,2);
+v38.BorderSizePixel=0;
+v38.ClipsDescendants=true;
+v38.ZIndex=14;
+v38.Parent=v13;
+
+local v47=Instance.new("UICorner");
+v47.CornerRadius=UDim.new(0,18);
+v47.Parent=v38;
+
+local v50=Instance.new("UIStroke");
+v50.Thickness=2;
+v50.Color=Color3.fromRGB(255,255,255);
+v50.Parent=v38;
+
+local v54=Instance.new("Folder");
+v54.Name="Particles";
+v54.Parent=v38;
+
+for v161=1,25 do
+local v162=Instance.new("Frame");
+local v163=math.random(2,4);
+
+v162.Size=UDim2.fromOffset(v163,v163);  
+v162.Position=UDim2.new(  
+    math.random(5,95)/100,  
+    0,  
+    math.random(5,95)/100,  
+    0  
+);  
+v162.BackgroundColor3=Color3.fromRGB(255,255,255);  
+v162.BackgroundTransparency=math.random(0,80)/100;  
+v162.BorderSizePixel=0;  
+v162.ZIndex=16;  
+v162.Parent=v54;  
+
+local v171=Instance.new("UICorner");  
+v171.CornerRadius=UDim.new(1,0);  
+v171.Parent=v162;  
+
+task.spawn(function()  
+    while v162.Parent do  
+        local v192=TweenService:Create(  
+            v162,  
+            TweenInfo.new(  
+                math.random(8,18)/10,  
+                Enum.EasingStyle.Sine,  
+                Enum.EasingDirection.InOut  
+            ),  
+            {  
+                Position=UDim2.new(  
+                    math.random(5,95)/100,  
+                    0,  
+                    math.random(5,95)/100,  
+                    0  
+                )  
+            }  
+        );  
+
+        v192:Play();  
+        v192.Completed:Wait();  
+    end  
+end);
+
+end
+
+local v57=Instance.new("Frame");
+v57.Size=UDim2.new(1,0,0,1);
+v57.Position=UDim2.new(0,0,-0.1,0);
+v57.BackgroundColor3=Color3.fromRGB(255,255,255);
+v57.BackgroundTransparency=0.35;
+v57.BorderSizePixel=0;
+v57.ZIndex=20;
+v57.Parent=v38;
+
+task.spawn(function()
+while v57.Parent do
+v57.Position=UDim2.new(0,0,-0.1,0);
+
+local v185=TweenService:Create(  
+        v57,  
+        TweenInfo.new(1.2,Enum.EasingStyle.Linear),  
+        {  
+            Position=UDim2.new(0,0,1.1,0)  
+        }  
+    );  
+
+    v185:Play();  
+    v185.Completed:Wait();  
+end
+
+end);
+
+local v65=Instance.new("ImageLabel");
+v65.Size=UDim2.fromOffset(48,48);
+v65.Position=UDim2.fromOffset(10,9);
+v65.BackgroundColor3=Color3.fromRGB(2,2,2);
+v65.BorderSizePixel=0;
+v65.Image=v7;
+v65.ScaleType=Enum.ScaleType.Crop;
+v65.ZIndex=20;
+v65.Parent=v38;
+
+local v74=Instance.new("UICorner");
+v74.CornerRadius=UDim.new(1,0);
+v74.Parent=v65;
+
+local v77=Instance.new("UIStroke");
+v77.Thickness=1.5;
+v77.Color=Color3.fromRGB(255,255,255);
+v77.Parent=v65;
+
+local v81=Instance.new("TextLabel");
+v81.BackgroundTransparency=1;
+v81.Position=UDim2.fromOffset(68,10);
+v81.Size=UDim2.new(1,-80,0,25);
+v81.Text="NEXORA HUB";
+v81.TextColor3=Color3.fromRGB(255,255,255);
+v81.Font=Enum.Font.GothamBlack;
+v81.TextSize=17;
+v81.TextXAlignment=Enum.TextXAlignment.Left;
+v81.ZIndex=50;
+v81.Parent=v38;
+
+local v94=Instance.new("TextLabel");
+v94.BackgroundTransparency=1;
+v94.Position=UDim2.fromOffset(68,34);
+v94.Size=UDim2.new(1,-80,0,16);
+v94.Text="[ BLACK ULTRA TELEPORT ]";
+v94.TextColor3=Color3.fromRGB(180,180,180);
+v94.Font=Enum.Font.Code;
+v94.TextSize=7;
+v94.TextXAlignment=Enum.TextXAlignment.Left;
+v94.ZIndex=50;
+v94.Parent=v38;
+
+local v106=Instance.new("Frame");
+v106.Position=UDim2.fromOffset(10,64);
+v106.Size=UDim2.new(1,-20,0,1);
+v106.BackgroundColor3=Color3.fromRGB(255,255,255);
+v106.BackgroundTransparency=0.45;
+v106.BorderSizePixel=0;
+v106.ZIndex=50;
+v106.Parent=v38;
+
+local v114=Instance.new("TextLabel");
+v114.Position=UDim2.fromOffset(10,76);
+v114.Size=UDim2.new(1,-20,0,24);
+v114.BackgroundColor3=Color3.fromRGB(10,10,10);
+v114.BorderSizePixel=0;
+v114.Text="   ●  SYSTEM READY";
+v114.TextColor3=Color3.fromRGB(255,255,255);
+v114.Font=Enum.Font.GothamBold;
+v114.TextSize=11;
+v114.TextXAlignment=Enum.TextXAlignment.Left;
+v114.ZIndex=50;
+v114.Parent=v38;
+
+local v127=Instance.new("UICorner");
+v127.CornerRadius=UDim.new(0,8);
+v127.Parent=v114;
+
+local v130=Instance.new("TextButton");
+v130.Name="ULTRA_TP";
+v130.Position=UDim2.fromOffset(10,110);
+v130.Size=UDim2.new(1,-20,0,45);
+v130.BackgroundColor3=Color3.fromRGB(10,10,10);
+v130.BorderSizePixel=0;
+v130.RichText=true;
+v130.Text=
+'<font color="rgb(255,255,255)">[+] ULTRA TP • </font>'..
+'<font color="rgb(0,255,100)">ON</font>';
+v130.TextColor3=Color3.fromRGB(255,255,255);
+v130.Font=Enum.Font.GothamBlack;
+v130.TextSize=13;
+v130.AutoButtonColor=false;
+v130.ZIndex=60;
+v130.Parent=v38;
+
+local v144=Instance.new("UICorner");
+v144.CornerRadius=UDim.new(0,12);
+v144.Parent=v130;
+
+local v147=Instance.new("UIStroke");
+v147.Thickness=2;
+v147.Color=Color3.fromRGB(255,255,255);
+v147.Transparency=0;
+v147.ApplyStrokeMode=Enum.ApplyStrokeMode.Border;
+v147.Parent=v130;
+
+v130.MouseButton1Click:Connect(function()
+v8=not v8;
+
+if v8 then  
+    v130.Text=  
+        '<font color="rgb(255,255,255)">[+] ULTRA TP • </font>'..  
+        '<font color="rgb(0,255,100)">ON</font>';  
+
+    v114.Text="   ●  SYSTEM READY";  
+    v114.TextColor3=Color3.fromRGB(0,255,100);  
+    v147.Color=Color3.fromRGB(0,255,100);  
+
+else  
+    v130.Text=  
+        '<font color="rgb(255,255,255)">[-] ULTRA TP • </font>'..  
+        '<font color="rgb(255,60,60)">OFF</font>';  
+
+    v114.Text="   ○  SYSTEM DISABLED";  
+    v114.TextColor3=Color3.fromRGB(255,80,80);  
+    v147.Color=Color3.fromRGB(255,60,60);  
+end
+
+end);
+
+v20.MouseButton1Click:Connect(function()
+v10=not v10;
+v38.Visible=v10;
+end);
+
+local v154=false;
+local v155;
+local v156;
+
+v81.InputBegan:Connect(function(v175)
+if v175.UserInputType==Enum.UserInputType.MouseButton1
+or v175.UserInputType==Enum.UserInputType.Touch then
+
+v154=true;  
+    v155=v175.Position;  
+    v156=v38.Position;  
+end
+
+end);
+
+v4.InputChanged:Connect(function(v176)
+if not v154 then
+return;
+end
+
+if v176.UserInputType==Enum.UserInputType.MouseMovement  
+    or v176.UserInputType==Enum.UserInputType.Touch then  
+
+    local v217=v176.Position-v155;  
+
+    v38.Position=UDim2.new(  
+        v156.X.Scale,  
+        v156.X.Offset+v217.X,  
+        v156.Y.Scale,  
+        v156.Y.Offset+v217.Y  
+    );  
+end
+
+end);
+
+v4.InputEnded:Connect(function(v178)
+if v178.UserInputType==Enum.UserInputType.MouseButton1
+or v178.UserInputType==Enum.UserInputType.Touch then
+
+v154=false;  
+end
+
+end);
+
+local function v157(v179)
+
+if not v8 then  
+    return;  
+end  
+
+if not v179 or not v179.Parent then  
+    return;  
+end  
+
+for v209,v210 in ipairs(v11) do  
+
+    if not v8 then  
+        v114.Text="   ○  ROUTE STOPPED";  
+        v114.TextColor3=Color3.fromRGB(255,60,60);  
+        return;  
+    end  
+
+    v114.Text="   [TP] POINT "..v209.."/"..#v11;  
+    v114.TextColor3=Color3.fromRGB(255,255,255);  
+
+    v179:PivotTo(CFrame.new(v210));  
+
+    if v209<#v11 then  
+        v2.Heartbeat:Wait();  
+    end  
+end  
+
+v114.Text="   [OK] ROUTE COMPLETE";  
+v114.TextColor3=Color3.fromRGB(0,255,100);
+
+end;
+
+v1.PromptTriggered:Connect(function(v181,v182)
+
+if v182~=v5 then  
+    return;  
+end  
+
+if not v8 or v9 then  
+    return;  
+end  
+
+local v183=v5.Character;  
+
+if not v183 then  
+    return;  
+end  
+
+v9=true;  
+v157(v183);  
+v9=false;
+
+end);
+
+--// RGB REAL EN BORDES
+task.spawn(function()
+    while v38.Parent do
+        local hue = tick() % 2
+        local rgb = Color3.fromHSV(hue, 0.9, 1)
+        pcall(function()
+            if v34 and v34.Parent then v34.Color = rgb end
+            if v50 and v50.Parent then v50.Color = rgb end
+            if v77 and v77.Parent then v77.Color = rgb end
+            if v147 and v147.Parent then v147.Color = rgb end
+        end)
+        task.wait(0.05)
+    end
+end)
+
+print("================================");
+print("       NEXORA HUB RGB");
+print("================================");
+print(" LOGO: 73031175768679");
+print(" RGB: ACTIVO EN BORDES");
+print("================================");
+
+--// KOXTA PERFORMANCE BUTTON
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local Lighting = game:GetService("Lighting")
+
+local Player = Players.LocalPlayer
+local PlayerGui = Player:WaitForChild("PlayerGui")
+
+local GUI = PlayerGui:FindFirstChild("NEXORA_HUB")
+if not GUI then warn("NEXORA_HUB no encontrado.") return end
+
+local Panel = GUI:FindFirstChild("NEXORA_PANEL")
+if not Panel then warn("NEXORA_PANEL no encontrado.") return end
+
+if Panel:FindFirstChild("NEXORA_PERFORMANCE") then return end
+
+local Enabled = false
+
+local Button = Instance.new("TextButton")
+Button.Name = "NEXORA_PERFORMANCE"
+Button.Position = UDim2.fromOffset(10, 160)
+Button.Size = UDim2.new(1, -20, 0, 45)
+Button.BackgroundColor3 = Color3.fromRGB(10,10,10)
+Button.BorderSizePixel = 0
+Button.Text = "[+] MEJORAR RENDIMIENTO • OFF"
+Button.TextColor3 = Color3.fromRGB(255,255,255)
+Button.Font = Enum.Font.GothamBlack
+Button.TextSize = 12
+Button.AutoButtonColor = false
+Button.ZIndex = 60
+Button.Parent = Panel
+
+local Corner = Instance.new("UICorner")
+Corner.CornerRadius = UDim.new(0,12)
+Corner.Parent = Button
+
+local Stroke = Instance.new("UIStroke")
+Stroke.Thickness = 2
+Stroke.Color = Color3.fromRGB(255,60,60)
+Stroke.Parent = Button
+
+local function Optimize(obj)
+    pcall(function()
+        if obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Beam") then
+            obj.Enabled = false
+        elseif obj:IsA("PointLight") or obj:IsA("SpotLight") or obj:IsA("SurfaceLight") then
+            obj.Shadows = false
+        elseif obj:IsA("BlurEffect") or obj:IsA("DepthOfFieldEffect") or obj:IsA("SunRaysEffect") then
+            obj.Enabled = false
+        end
+    end)
+end
+
+local function EnablePerformance()
+    Enabled = true
+    for _, obj in ipairs(Workspace:GetDescendants()) do Optimize(obj) end
+    for _, obj in ipairs(Lighting:GetDescendants()) do Optimize(obj) end
+    Button.Text = "[+] MEJORAR RENDIMIENTO • ON"
+    Stroke.Color = Color3.fromRGB(0,255,100)
+end
+
+local function DisablePerformance()
+    Enabled = false
+    Button.Text = "[+] MEJORAR RENDIMIENTO • OFF"
+    Stroke.Color = Color3.fromRGB(255,60,60)
+end
+
+Workspace.DescendantAdded:Connect(function(obj)
+    if Enabled then task.defer(function() Optimize(obj) end) end
+end)
+
+Lighting.DescendantAdded:Connect(function(obj)
+    if Enabled then task.defer(function() Optimize(obj) end) end
+end)
+
+Button.MouseButton1Click:Connect(function()
+    if Enabled then DisablePerformance() else EnablePerformance() end
+end)
+
+print("NEXORA PERFORMANCE BUTTON INTEGRADO")
+
+--// NEXORA PERFORMANCE BOOST (AUTO ON)
+task.spawn(function()
+    local GUI
+    local Panel
+
+    repeat
+        task.wait(0.1)
+        GUI = v6:FindFirstChild("NEXORA_HUB")
+        if GUI then Panel = GUI:FindFirstChild("NEXORA_PANEL") end
+    until GUI and Panel
+
+    if Panel:FindFirstChild("NEXORA_PERFORMANCE") then return end
+
+    Panel.Size = UDim2.fromOffset(255,225)
+
+    local Button = Instance.new("TextButton")
+    Button.Name = "NEXORA_PERFORMANCE"
+    Button.Position = UDim2.fromOffset(10,165)
+    Button.Size = UDim2.new(1,-20,0,45)
+    Button.BackgroundColor3 = Color3.fromRGB(10,10,10)
+    Button.BorderSizePixel = 0
+    Button.RichText = true
+    Button.Text = '<font color="rgb(255,255,255)">[+] MEJORAR RENDIMIENTO • </font>'..'<font color="rgb(0,255,100)">ON</font>'
+    Button.TextColor3 = Color3.fromRGB(255,255,255)
+    Button.Font = Enum.Font.GothamBlack
+    Button.TextSize = 12
+    Button.AutoButtonColor = false
+    Button.ZIndex = 60
+    Button.Parent = Panel
+
+    local Corner = Instance.new("UICorner")
+    Corner.CornerRadius = UDim.new(0,12)
+    Corner.Parent = Button
+
+    local Stroke = Instance.new("UIStroke")
+    Stroke.Thickness = 2
+    Stroke.Color = Color3.fromRGB(0,255,100)
+    Stroke.Parent = Button
+
+    local Enabled = true
+
+    local function Optimize(obj)
+        pcall(function()
+            if obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Beam") then
+                obj.Enabled = false
+            elseif obj:IsA("PointLight") or obj:IsA("SpotLight") or obj:IsA("SurfaceLight") then
+                obj.Shadows = false
+            elseif obj:IsA("BlurEffect") or obj:IsA("DepthOfFieldEffect") or obj:IsA("SunRaysEffect") then
+                obj.Enabled = false
+            end
+        end)
+    end
+
+    local function EnablePerformance()
+        Enabled = true
+        for _,obj in ipairs(Workspace:GetDescendants()) do Optimize(obj) end
+        for _,obj in ipairs(Lighting:GetDescendants()) do Optimize(obj) end
+        Button.Text = '<font color="rgb(255,255,255)">[+] MEJORAR RENDIMIENTO • </font>'..'<font color="rgb(0,255,100)">ON</font>'
+        Stroke.Color = Color3.fromRGB(0,255,100)
+    end
+
+    local function DisablePerformance()
+        Enabled = false
+        Button.Text = '<font color="rgb(255,255,255)">[-] MEJORAR RENDIMIENTO • </font>'..'<font color="rgb(255,60,60)">OFF</font>'
+        Stroke.Color = Color3.fromRGB(255,60,60)
+    end
+
+    Workspace.DescendantAdded:Connect(function(obj)
+        if Enabled then task.defer(function() if obj and obj.Parent then Optimize(obj) end end) end
+    end)
+
+    Lighting.DescendantAdded:Connect(function(obj)
+        if Enabled then task.defer(function() if obj and obj.Parent then Optimize(obj) end end) end
+    end)
+
+    Button.MouseButton1Click:Connect(function()
+        if Enabled then DisablePerformance() else EnablePerformance() end
+    end)
+
+    EnablePerformance()
+end)
