@@ -10,6 +10,21 @@ local v8=true;
 local v9=false;
 local v10=true;
 
+--// NEXORA RGB VISUAL THEME
+local NEXORA_RGB_HUE = 0
+task.spawn(function()
+    while task.wait(0.03) do
+        NEXORA_RGB_HUE = (NEXORA_RGB_HUE + 0.003) % 1
+        local rgb = Color3.fromHSV(NEXORA_RGB_HUE, 0.95, 1)
+        pcall(function()
+            if v34 then v34.Color = rgb end
+            if v50 then v50.Color = rgb end
+            if v77 then v77.Color = rgb end
+            if v147 then v147.Color = rgb end
+        end)
+    end
+end)
+
 local v11={
 Vector3.new(500.62,70.28,-366.64),
 Vector3.new(508.3,70.28,-366.03),
@@ -34,7 +49,7 @@ local v20=Instance.new("ImageButton");
 v20.Name="NEXORA_FLOAT";
 v20.Size=UDim2.fromOffset(54,54);
 v20.Position=UDim2.new(1,-68,0,16);
-v20.BackgroundColor3=Color3.fromRGB(2,2,2);
+v20.BackgroundColor3=Color3.fromRGB(0,0,0);
 v20.BorderSizePixel=0;
 v20.Image=v7;
 v20.ScaleType=Enum.ScaleType.Crop;
@@ -150,7 +165,7 @@ end);
 local v65=Instance.new("ImageLabel");
 v65.Size=UDim2.fromOffset(48,48);
 v65.Position=UDim2.fromOffset(10,9);
-v65.BackgroundColor3=Color3.fromRGB(2,2,2);
+v65.BackgroundColor3=Color3.fromRGB(0,0,0);
 v65.BorderSizePixel=0;
 v65.Image=v7;
 v65.ScaleType=Enum.ScaleType.Crop;
@@ -352,6 +367,7 @@ end;
 
 v1.PromptTriggered:Connect(function(v181,v182)
 
+--// CORREGIDO  
 if v182~=v5 then  
     return;  
 end  
@@ -372,26 +388,63 @@ v9=false;
 
 end);
 
---// RGB REAL EN BORDES
 task.spawn(function()
-    while v38.Parent do
-        local hue = tick() % 2
-        local rgb = Color3.fromHSV(hue, 0.9, 1)
-        pcall(function()
-            if v34 and v34.Parent then v34.Color = rgb end
-            if v50 and v50.Parent then v50.Color = rgb end
-            if v77 and v77.Parent then v77.Color = rgb end
-            if v147 and v147.Parent then v147.Color = rgb end
-        end)
-        task.wait(0.05)
-    end
-end)
+while v38.Parent do
+
+local v186=v3:Create(  
+        v50,  
+        TweenInfo.new(0.43),  
+        {Transparency=0.55}  
+    );  
+
+    v186:Play();  
+    v186.Completed:Wait();  
+
+    local v187=v3:Create(  
+        v50,  
+        TweenInfo.new(1),  
+        {Transparency=0}  
+    );  
+
+    v187:Play();  
+    v187.Completed:Wait();  
+end
+
+end);
+
+task.spawn(function()
+while v20.Parent do
+
+local v189=v3:Create(  
+        v34,  
+        TweenInfo.new(0.8),  
+        {Transparency=0.55}  
+    );  
+
+    v189:Play();  
+    v189.Completed:Wait();  
+
+    local v190=v3:Create(  
+        v34,  
+        TweenInfo.new(0.295),  
+        {Transparency=0}  
+    );  
+
+    v190:Play();  
+    v190.Completed:Wait();  
+end
+
+end);
 
 print("================================");
 print("       NEXORA HUB RGB");
 print("================================");
 print(" LOGO: 73031175768679");
-print(" RGB: ACTIVO EN BORDES");
+print(" POINTS: 5");
+print(" ON: GREEN");
+print(" OFF: RED");
+print(" BUTTON BORDER: WHITE");
+print(" AUTO GRAB: DISABLED");
 print("================================");
 
 --// KOXTA PERFORMANCE BUTTON
@@ -403,12 +456,22 @@ local Player = Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
 
 local GUI = PlayerGui:FindFirstChild("NEXORA_HUB")
-if not GUI then warn("NEXORA_HUB no encontrado.") return end
+
+if not GUI then
+    warn("NEXORA_HUB no encontrado.")
+    return
+end
 
 local Panel = GUI:FindFirstChild("NEXORA_PANEL")
-if not Panel then warn("NEXORA_PANEL no encontrado.") return end
 
-if Panel:FindFirstChild("NEXORA_PERFORMANCE") then return end
+if not Panel then
+    warn("NEXORA_PANEL no encontrado.")
+    return
+end
+
+if Panel:FindFirstChild("NEXORA_PERFORMANCE") then
+    return
+end
 
 local Enabled = false
 
@@ -449,8 +512,12 @@ end
 
 local function EnablePerformance()
     Enabled = true
-    for _, obj in ipairs(Workspace:GetDescendants()) do Optimize(obj) end
-    for _, obj in ipairs(Lighting:GetDescendants()) do Optimize(obj) end
+    for _, obj in ipairs(Workspace:GetDescendants()) do
+        Optimize(obj)
+    end
+    for _, obj in ipairs(Lighting:GetDescendants()) do
+        Optimize(obj)
+    end
     Button.Text = "[+] MEJORAR RENDIMIENTO • ON"
     Stroke.Color = Color3.fromRGB(0,255,100)
 end
@@ -462,20 +529,32 @@ local function DisablePerformance()
 end
 
 Workspace.DescendantAdded:Connect(function(obj)
-    if Enabled then task.defer(function() Optimize(obj) end) end
+    if Enabled then
+        task.defer(function()
+            Optimize(obj)
+        end)
+    end
 end)
 
 Lighting.DescendantAdded:Connect(function(obj)
-    if Enabled then task.defer(function() Optimize(obj) end) end
+    if Enabled then
+        task.defer(function()
+            Optimize(obj)
+        end)
+    end
 end)
 
 Button.MouseButton1Click:Connect(function()
-    if Enabled then DisablePerformance() else EnablePerformance() end
+    if Enabled then
+        DisablePerformance()
+    else
+        EnablePerformance()
+    end
 end)
 
 print("NEXORA PERFORMANCE BUTTON INTEGRADO")
 
---// NEXORA PERFORMANCE BOOST (AUTO ON)
+--// NEXORA PERFORMANCE BOOST
 task.spawn(function()
     local GUI
     local Panel
@@ -483,10 +562,14 @@ task.spawn(function()
     repeat
         task.wait(0.1)
         GUI = v6:FindFirstChild("NEXORA_HUB")
-        if GUI then Panel = GUI:FindFirstChild("NEXORA_PANEL") end
+        if GUI then
+            Panel = GUI:FindFirstChild("NEXORA_PANEL")
+        end
     until GUI and Panel
 
-    if Panel:FindFirstChild("NEXORA_PERFORMANCE") then return end
+    if Panel:FindFirstChild("NEXORA_PERFORMANCE") then
+        return
+    end
 
     Panel.Size = UDim2.fromOffset(255,225)
 
@@ -530,8 +613,12 @@ task.spawn(function()
 
     local function EnablePerformance()
         Enabled = true
-        for _,obj in ipairs(Workspace:GetDescendants()) do Optimize(obj) end
-        for _,obj in ipairs(Lighting:GetDescendants()) do Optimize(obj) end
+        for _,obj in ipairs(Workspace:GetDescendants()) do
+            Optimize(obj)
+        end
+        for _,obj in ipairs(Lighting:GetDescendants()) do
+            Optimize(obj)
+        end
         Button.Text = '<font color="rgb(255,255,255)">[+] MEJORAR RENDIMIENTO • </font>'..'<font color="rgb(0,255,100)">ON</font>'
         Stroke.Color = Color3.fromRGB(0,255,100)
     end
