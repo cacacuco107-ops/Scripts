@@ -82,9 +82,7 @@ v47.Parent=v38;
 local v50=Instance.new("UIStroke");
 v50.Thickness=2;
 v50.Color=Color3.fromRGB(255,255,255);
-v50.Parent=v38;
-
-local v54=Instance.new("Folder");
+v50.Parent=v38;local v54=Instance.new("Folder");
 v54.Name="Particles";
 v54.Parent=v38;
 
@@ -179,9 +177,7 @@ v74.Parent=v65;
 local v77=Instance.new("UIStroke");
 v77.Thickness=1.5;
 v77.Color=Color3.fromRGB(255,255,255);
-v77.Parent=v65;
-
-local v81=Instance.new("TextLabel");
+v77.Parent=v65;local v81=Instance.new("TextLabel");
 v81.BackgroundTransparency=1;
 v81.Position=UDim2.fromOffset(68,10);
 v81.Size=UDim2.new(1,-80,0,25);
@@ -281,9 +277,7 @@ else
     v147.Color=Color3.fromRGB(255,60,60);  
 end
 
-end);
-
-v20.MouseButton1Click:Connect(function()
+end);v20.MouseButton1Click:Connect(function()
 v10=not v10;
 v38.Visible=v10;
 end);
@@ -386,9 +380,7 @@ v9=true;
 v157(v183);  
 v9=false;
 
-end);
-
-task.spawn(function()
+end);task.spawn(function()
 while v38.Parent do
 
 local v186=v3:Create(  
@@ -445,9 +437,9 @@ print(" ON: GREEN");
 print(" OFF: RED");
 print(" BUTTON BORDER: WHITE");
 print(" AUTO GRAB: DISABLED");
-print("================================");
+print("================================");--// KOXTA PERFORMANCE BUTTON
+--// Se integra automáticamente al NEXORA HUB RGB
 
---// KOXTA PERFORMANCE BUTTON
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local Lighting = game:GetService("Lighting")
@@ -455,6 +447,7 @@ local Lighting = game:GetService("Lighting")
 local Player = Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
 
+-- Buscar el panel existente
 local GUI = PlayerGui:FindFirstChild("NEXORA_HUB")
 
 if not GUI then
@@ -469,11 +462,20 @@ if not Panel then
     return
 end
 
+-- Evitar duplicados
 if Panel:FindFirstChild("NEXORA_PERFORMANCE") then
     return
 end
 
+--==================================================
+-- CONFIGURACIÓN
+--==================================================
+
 local Enabled = false
+
+--==================================================
+-- BOTÓN
+--==================================================
 
 local Button = Instance.new("TextButton")
 Button.Name = "NEXORA_PERFORMANCE"
@@ -498,80 +500,134 @@ Stroke.Thickness = 2
 Stroke.Color = Color3.fromRGB(255,60,60)
 Stroke.Parent = Button
 
+--==================================================
+-- OPTIMIZACIÓN
+--==================================================
+
 local function Optimize(obj)
+
     pcall(function()
-        if obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Beam") then
+
+        if obj:IsA("ParticleEmitter")
+        or obj:IsA("Trail")
+        or obj:IsA("Beam") then
+
             obj.Enabled = false
-        elseif obj:IsA("PointLight") or obj:IsA("SpotLight") or obj:IsA("SurfaceLight") then
+
+        elseif obj:IsA("PointLight")
+        or obj:IsA("SpotLight")
+        or obj:IsA("SurfaceLight") then
+
             obj.Shadows = false
-        elseif obj:IsA("BlurEffect") or obj:IsA("DepthOfFieldEffect") or obj:IsA("SunRaysEffect") then
+
+        elseif obj:IsA("BlurEffect")
+        or obj:IsA("DepthOfFieldEffect")
+        or obj:IsA("SunRaysEffect") then
+
             obj.Enabled = false
+
         end
+
     end)
+
 end
 
 local function EnablePerformance()
+
     Enabled = true
+
     for _, obj in ipairs(Workspace:GetDescendants()) do
         Optimize(obj)
     end
+
     for _, obj in ipairs(Lighting:GetDescendants()) do
         Optimize(obj)
     end
+
     Button.Text = "[+] MEJORAR RENDIMIENTO • ON"
     Stroke.Color = Color3.fromRGB(0,255,100)
+
 end
 
 local function DisablePerformance()
+
     Enabled = false
+
     Button.Text = "[+] MEJORAR RENDIMIENTO • OFF"
     Stroke.Color = Color3.fromRGB(255,60,60)
+
 end
 
+--==================================================
+-- OBJETOS NUEVOS
+--==================================================
+
 Workspace.DescendantAdded:Connect(function(obj)
+
     if Enabled then
         task.defer(function()
             Optimize(obj)
         end)
     end
+
 end)
 
 Lighting.DescendantAdded:Connect(function(obj)
+
     if Enabled then
         task.defer(function()
             Optimize(obj)
         end)
     end
+
 end)
 
+--==================================================
+-- BOTÓN
+--==================================================
+
 Button.MouseButton1Click:Connect(function()
+
     if Enabled then
         DisablePerformance()
     else
         EnablePerformance()
     end
+
 end)
 
 print("NEXORA PERFORMANCE BUTTON INTEGRADO")
-
 --// NEXORA PERFORMANCE BOOST
+--// AUTO ON AL CARGAR + BOTÓN ON/OFF
+
 task.spawn(function()
+
+    -- Esperar a que exista el HUB
     local GUI
     local Panel
 
     repeat
         task.wait(0.1)
+
         GUI = v6:FindFirstChild("NEXORA_HUB")
+
         if GUI then
             Panel = GUI:FindFirstChild("NEXORA_PANEL")
         end
+
     until GUI and Panel
 
+    -- Evitar duplicado
     if Panel:FindFirstChild("NEXORA_PERFORMANCE") then
         return
     end
 
+    -- Agrandar panel automáticamente
     Panel.Size = UDim2.fromOffset(255,225)
+
+    --==================================================
+    -- BOTÓN
+    --==================================================
 
     local Button = Instance.new("TextButton")
     Button.Name = "NEXORA_PERFORMANCE"
@@ -580,7 +636,9 @@ task.spawn(function()
     Button.BackgroundColor3 = Color3.fromRGB(10,10,10)
     Button.BorderSizePixel = 0
     Button.RichText = true
-    Button.Text = '<font color="rgb(255,255,255)">[+] MEJORAR RENDIMIENTO • </font>'..'<font color="rgb(0,255,100)">ON</font>'
+    Button.Text =
+        '<font color="rgb(255,255,255)">[+] MEJORAR RENDIMIENTO • </font>'..
+        '<font color="rgb(0,255,100)">ON</font>'
     Button.TextColor3 = Color3.fromRGB(255,255,255)
     Button.Font = Enum.Font.GothamBlack
     Button.TextSize = 12
@@ -597,49 +655,142 @@ task.spawn(function()
     Stroke.Color = Color3.fromRGB(0,255,100)
     Stroke.Parent = Button
 
+    --==================================================
+    -- ESTADO
+    --==================================================
+
     local Enabled = true
 
+    --==================================================
+    -- OPTIMIZAR
+    --==================================================
+
     local function Optimize(obj)
+
         pcall(function()
-            if obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Beam") then
+
+            if obj:IsA("ParticleEmitter")
+            or obj:IsA("Trail")
+            or obj:IsA("Beam") then
+
                 obj.Enabled = false
-            elseif obj:IsA("PointLight") or obj:IsA("SpotLight") or obj:IsA("SurfaceLight") then
+
+            elseif obj:IsA("PointLight")
+            or obj:IsA("SpotLight")
+            or obj:IsA("SurfaceLight") then
+
                 obj.Shadows = false
-            elseif obj:IsA("BlurEffect") or obj:IsA("DepthOfFieldEffect") or obj:IsA("SunRaysEffect") then
+
+            elseif obj:IsA("BlurEffect")
+            or obj:IsA("DepthOfFieldEffect")
+            or obj:IsA("SunRaysEffect") then
+
                 obj.Enabled = false
+
             end
+
         end)
+
     end
 
+    --==================================================
+    -- ACTIVAR
+    --==================================================
+
     local function EnablePerformance()
+
         Enabled = true
+
         for _,obj in ipairs(Workspace:GetDescendants()) do
             Optimize(obj)
         end
+
         for _,obj in ipairs(Lighting:GetDescendants()) do
             Optimize(obj)
         end
-        Button.Text = '<font color="rgb(255,255,255)">[+] MEJORAR RENDIMIENTO • </font>'..'<font color="rgb(0,255,100)">ON</font>'
+
+        Button.Text =
+            '<font color="rgb(255,255,255)">[+] MEJORAR RENDIMIENTO • </font>'..
+            '<font color="rgb(0,255,100)">ON</font>'
+
         Stroke.Color = Color3.fromRGB(0,255,100)
+
+        print("NEXORA PERFORMANCE: ON")
+
     end
+
+    --==================================================
+    -- DESACTIVAR
+    --==================================================
 
     local function DisablePerformance()
+
         Enabled = false
-        Button.Text = '<font color="rgb(255,255,255)">[-] MEJORAR RENDIMIENTO • </font>'..'<font color="rgb(255,60,60)">OFF</font>'
+
+        Button.Text =
+            '<font color="rgb(255,255,255)">[-] MEJORAR RENDIMIENTO • </font>'..
+            '<font color="rgb(255,60,60)">OFF</font>'
+
         Stroke.Color = Color3.fromRGB(255,60,60)
+
+        print("NEXORA PERFORMANCE: OFF")
+
     end
 
+    --==================================================
+    -- OBJETOS NUEVOS
+    --==================================================
+
     Workspace.DescendantAdded:Connect(function(obj)
-        if Enabled then task.defer(function() if obj and obj.Parent then Optimize(obj) end end) end
+
+        if Enabled then
+
+            task.defer(function()
+
+                if obj and obj.Parent then
+                    Optimize(obj)
+                end
+
+            end)
+
+        end
+
     end)
 
     Lighting.DescendantAdded:Connect(function(obj)
-        if Enabled then task.defer(function() if obj and obj.Parent then Optimize(obj) end end) end
+
+        if Enabled then
+
+            task.defer(function()
+
+                if obj and obj.Parent then
+                    Optimize(obj)
+                end
+
+            end)
+
+        end
+
     end)
+
+    --==================================================
+    -- BOTÓN ON / OFF
+    --==================================================
 
     Button.MouseButton1Click:Connect(function()
-        if Enabled then DisablePerformance() else EnablePerformance() end
+
+        if Enabled then
+            DisablePerformance()
+        else
+            EnablePerformance()
+        end
+
     end)
 
+    --==================================================
+    -- ACTIVAR AUTOMÁTICAMENTE
+    --==================================================
+
     EnablePerformance()
+
 end)
