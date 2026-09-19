@@ -1,0 +1,228 @@
+-- Cut and Ride Pet - Auto Farm Script
+-- Compatible con la mayoría de executors
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local TweenService = game:GetService("TweenService")
+
+local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+
+-- Configuración
+local Settings = {
+    AutoFarm = true,
+    AutoCollect = true,
+    AutoCut = true,
+    CollectRadius = 50,
+    CutRadius = 15,
+    TweenSpeed = 150,
+    AntiAFK = true
+}
+
+-- UI Básica
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "CutAndRideHub"
+ScreenGui.Parent = game.CoreGui
+
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 250, 0, 200)
+MainFrame.Position = UDim2.new(0.1, 0, 0.1, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+MainFrame.BorderSizePixel = 0
+MainFrame.Parent = ScreenGui
+
+-- Título
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.Text = "Cut & Ride Pet - Auto Farm"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+Title.Parent = MainFrame
+
+-- Botón Auto Farm
+local FarmButton = Instance.new("TextButton")
+FarmButton.Size = UDim2.new(0.9, 0, 0, 35)
+FarmButton.Position = UDim2.new(0.05, 0, 0.25, 0)
+FarmButton.Text = "Auto Farm: ON"
+FarmButton.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
+FarmButton.Parent = MainFrame
+
+-- Botón Auto Collect
+local CollectButton = Instance.new("TextButton")
+CollectButton.Size = UDim2.new(0.9, 0, 0, 35)
+CollectButton.Position = UDim2.new(0.05, 0, 0.5, 0)
+CollectButton.Text = "Auto Collect: ON"
+CollectButton.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
+CollectButton.Parent = MainFrame
+
+-- Botón Cerrar
+local CloseButton = Instance.new("TextButton")
+CloseButton.Size = UDim2.new(0, 25, 0, 25)
+CloseButton.Position = UDim2.new(1, -30, 0, 2)
+CloseButton.Text = "X"
+CloseButton.TextColor3 = Color3.fromRGB(255, 0, 0)
+CloseButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+CloseButton.Parent = MainFrame
+
+-- Función para encontrar objetos recolectables
+local function GetCollectables()
+    local collectables = {}
+    for _, obj in pairs(workspace:GetDescendants()) do
+        if obj:IsA("BasePart") or obj:IsA("MeshPart") then
+            -- Busca objetos comunes de colección (ajusta según el juego)
+            if obj.Name:lower():match("coin") or 
+               obj.Name:lower():match("gem") or 
+               obj.Name:lower():match("drop") or
+               obj.Name:lower():match("fruit") or
+               obj.Name:lower():match("item") then
+                table.insert(collectables, obj)
+            end
+        end
+    end
+    return collectables
+end
+
+-- Función para encontrar objetos para cortar
+local function GetCuttableObjects()
+    local cuttables = {}
+    for _, obj in pairs(workspace:GetDescendants()) do
+        if obj:IsA("Model") or obj:IsA("BasePart") then
+            -- Busca árboles, rocas, etc.
+            if obj.Name:lower():match("tree") or 
+               obj.Name:lower():match("rock") or 
+               obj.Name:lower():match("bush") or
+               obj.Name:lower():match("wood") then
+                table.insert(cuttables, obj)
+            end
+        end
+    end
+    return cuttables
+end
+
+-- Teletransporte suave
+local function TweenToPosition(position)
+    local distance = (position - HumanoidRootPart.Position).Magnitude
+    local time = distance / Settings.TweenSpeed
+    
+    local tween = TweenService:Create(
+        HumanoidRootPart,
+        TweenInfo.new(time, Enum.EasingStyle.Linear),
+        {CFrame = CFrame.new(position)}
+    )
+    tween:Play()
+    tween.Completed:Wait()
+end
+
+-- Auto Farm Loop
+task.spawn(function()
+    while Settings.AutoFarm do
+        task.wait(0.1)
+        
+        if Settings.AutoCollect then
+            local collectables = GetCollectables()
+            
+            for _, item in ipairs(collectables) do
+                if not Settings.AutoFarm then break end
+                
+                if item and item.Parent then
+                    local distance = (item.Position - HumanoidRootPart.Position).Magnitude
+                    
+                    if distance <= Settings.CollectRadius then
+                        pcall(function()
+                            TweenToPosition(item.Position)
+                            
+                            -- Simular touch
+                            if item:FindFirstChild("TouchInterest") then
+                                firetouchinterest(HumanoidRootPart, item, 0)
+                                firetouchinterest(HumanoidRootPart, item, 1)
+                            end
+                            
+                            -- Intentar activar remotos comunes
+                            for _, remote in pairs(ReplicatedStorage:GetDescendants()) do
+                                if remote:IsA("RemoteEvent") and remote.Name:lower():match("collect") then
+                                    remote:FireServer(item)
+                                end
+                            end
+                        end)
+                        
+                        task.wait(0.2)
+                    end
+                end
+            end
+        end
+        
+        -- Auto Cut
+        if Settings.AutoCut then
+            local cuttables = GetCuttableObjects()
+            
+            for _, obj in ipairs(cuttables) do
+                if not Settings.AutoFarm then break end
+                
+                pcall(function()
+                    local targetPos = obj:IsA("Model") and obj:GetPivot().Position or obj.Position
+                    local distance = (targetPos - HumanoidRootPart.Position).Magnitude
+                    
+                    if distance <= Settings.CutRadius then
+                        TweenToPosition(targetPos + Vector3.new(0, 3, 0))
+                        
+                        -- Simular click/hit
+                        VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, game, 1)
+                        task.wait(0.1)
+                        VirtualInputManager:SendMouseButtonEvent(0, 0, 0, false, game, 1)
+                        
+                        -- Intentar activar remotos de corte
+                        for _, remote in pairs(ReplicatedStorage:GetDescendants()) do
+                            if remote:IsA("RemoteEvent") and (
+                                remote.Name:lower():match("cut") or
+                                remote.Name:lower():match("hit") or
+                                remote.Name:lower():match("damage")
+                            ) then
+                                remote:FireServer(obj)
+                            end
+                        end
+                        
+                        task.wait(0.3)
+                    end
+                end)
+            end
+        end
+    end
+end)
+
+-- Anti AFK
+if Settings.AntiAFK then
+    local VirtualUser = game:GetService("VirtualUser")
+    LocalPlayer.Idled:Connect(function()
+        VirtualUser:CaptureController()
+        VirtualUser:ClickButton2(Vector2.new())
+    end)
+end
+
+-- Eventos de botones
+FarmButton.MouseButton1Click:Connect(function()
+    Settings.AutoFarm = not Settings.AutoFarm
+    FarmButton.Text = "Auto Farm: " .. (Settings.AutoFarm and "ON" or "OFF")
+    FarmButton.BackgroundColor3 = Settings.AutoFarm and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(200, 0, 0)
+end)
+
+CollectButton.MouseButton1Click:Connect(function()
+    Settings.AutoCollect = not Settings.AutoCollect
+    CollectButton.Text = "Auto Collect: " .. (Settings.AutoCollect and "ON" or "OFF")
+    CollectButton.BackgroundColor3 = Settings.AutoCollect and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(200, 0, 0)
+end)
+
+CloseButton.MouseButton1Click:Connect(function()
+    Settings.AutoFarm = false
+    ScreenGui:Destroy()
+end)
+
+-- Actualizar Character cuando respawnea
+LocalPlayer.CharacterAdded:Connect(function(char)
+    Character = char
+    HumanoidRootPart = char:WaitForChild("HumanoidRootPart")
+end)
+
+print("Cut & Ride Pet Auto Farm cargado!")
