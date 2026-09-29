@@ -1,0 +1,188 @@
+--[[ Generado por LUA IA NEXORA ]]
+local Player = game:GetService("Players").LocalPlayer
+local Lighting = game:GetService("Lighting")
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local ScreenGui = Instance.new("ScreenGui", Player:WaitForChild("PlayerGui"))
+ScreenGui.Name = "FPSBoostUI"
+ScreenGui.ResetOnSpawn = false
+
+local connections = {}
+local boosted = false
+local originalSettings = {}
+local modifiedInstances = {}
+local moving = false
+
+local function applyBoost()
+    pcall(function()
+        originalSettings.GlobalShadows = Lighting.GlobalShadows
+        originalSettings.FogEnd = Lighting.FogEnd
+        originalSettings.Brightness = Lighting.Brightness
+        originalSettings.EnvironmentDiffuseScale = Lighting.EnvironmentDiffuseScale
+        originalSettings.EnvironmentSpecularScale = Lighting.EnvironmentSpecularScale
+        if Lighting:FindFirstChild("Technology") then
+            originalSettings.Technology = Lighting.Technology
+            Lighting.Technology = Enum.TechnologyCompatibilityMode.Classic
+        end
+        Lighting.GlobalShadows = false
+        Lighting.FogEnd = 1000000
+        Lighting.Brightness = 2
+    end)
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Beam") or obj:IsA("Fire") or obj:IsA("Smoke") or obj:IsA("Sparkles") or obj:IsA("Explosion") then
+            if obj.Enabled ~= nil then
+                modifiedInstances[obj] = obj.Enabled
+                obj.Enabled = false
+            end
+        elseif obj:IsA("Decal") then
+            modifiedInstances[obj] = obj.Transparency
+            obj.Transparency = 1
+        end
+    end
+end
+
+local function restoreBoost()
+    pcall(function()
+        if originalSettings.GlobalShadows ~= nil then Lighting.GlobalShadows = originalSettings.GlobalShadows end
+        if originalSettings.FogEnd ~= nil then Lighting.FogEnd = originalSettings.FogEnd end
+        if originalSettings.Brightness ~= nil then Lighting.Brightness = originalSettings.Brightness end
+        if originalSettings.EnvironmentDiffuseScale ~= nil then Lighting.EnvironmentDiffuseScale = originalSettings.EnvironmentDiffuseScale end
+        if originalSettings.EnvironmentSpecularScale ~= nil then Lighting.EnvironmentSpecularScale = originalSettings.EnvironmentSpecularScale end
+        if originalSettings.Technology ~= nil then Lighting.Technology = originalSettings.Technology end
+    end)
+    for obj, val in pairs(modifiedInstances) do
+        if obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Beam") or obj:IsA("Fire") or obj:IsA("Smoke") or obj:IsA("Sparkles") or obj:IsA("Explosion") then
+            if obj.Enabled ~= nil then obj.Enabled = val end
+        elseif obj:IsA("Decal") then
+            obj.Transparency = val
+        end
+    end
+    modifiedInstances = {}
+end
+
+local MainFrame = Instance.new("Frame", ScreenGui)
+MainFrame.Size = UDim2.new(0,240,0,120)
+MainFrame.Position = UDim2.new(0,10,0,10)
+MainFrame.BackgroundColor3 = Color3.fromRGB(30,30,30)
+
+local UICorner = Instance.new("UICorner", MainFrame)
+UICorner.CornerRadius = UDim.new(0,10)
+
+local UIStroke = Instance.new("UIStroke", MainFrame)
+UIStroke.Color = Color3.fromRGB(0,170,255)
+UIStroke.Thickness = 2
+
+local Header = Instance.new("TextButton", MainFrame)
+Header.Size = UDim2.new(1,0,0,44)
+Header.BackgroundTransparency = 1
+Header.Text = ""
+
+local Logo = Instance.new("ImageLabel", Header)
+Logo.Size = UDim2.new(0,36,0,36)
+Logo.Position = UDim2.new(0,4,0.5,-18)
+Logo.BackgroundTransparency = 1
+Logo.Image = "rbxassetid://124232894297657"
+
+local Title = Instance.new("TextLabel", Header)
+Title.Size = UDim2.new(1,-80,1,0)
+Title.Position = UDim2.new(0,48,0,0)
+Title.BackgroundTransparency = 1
+Title.Text = "FPS Boost"
+Title.TextColor3 = Color3.fromRGB(255,255,255)
+Title.Font = Enum.Font.SourceSansBold
+Title.TextSize = 20
+Title.TextXAlignment = Enum.TextXAlignment.Left
+
+local MinBtn = Instance.new("TextButton", Header)
+MinBtn.Size = UDim2.new(0,30,0,30)
+MinBtn.Position = UDim2.new(1,-34,0.5,-15)
+MinBtn.BackgroundColor3 = Color3.fromRGB(50,50,50)
+MinBtn.Text = "-"
+MinBtn.TextColor3 = Color3.fromRGB(255,255,255)
+MinBtn.Font = Enum.Font.SourceSansBold
+MinBtn.TextSize = 20
+
+local MaxBtn = Instance.new("TextButton", Header)
+MaxBtn.Size = UDim2.new(0,30,0,30)
+MaxBtn.Position = UDim2.new(1,-68,0.5,-15)
+MaxBtn.BackgroundColor3 = Color3.fromRGB(50,50,50)
+MaxBtn.Text = "+"
+MaxBtn.TextColor3 = Color3.fromRGB(255,255,255)
+MaxBtn.Font = Enum.Font.SourceSansBold
+MaxBtn.TextSize = 20
+
+local ToggleBtn = Instance.new("TextButton", MainFrame)
+ToggleBtn.Size = UDim2.new(1,-20,0,30)
+ToggleBtn.Position = UDim2.new(0,10,0,60)
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(170,0,0)
+ToggleBtn.Text = "FPS Boost [OFF]"
+ToggleBtn.TextColor3 = Color3.fromRGB(255,255,255)
+ToggleBtn.Font = Enum.Font.SourceSans
+ToggleBtn.TextSize = 18
+
+local MiniLogo = Instance.new("ImageButton", ScreenGui)
+MiniLogo.Size = UDim2.new(0,36,0,36)
+MiniLogo.Position = UDim2.new(0,10,0,10)
+MiniLogo.BackgroundTransparency = 1
+MiniLogo.Image = "rbxassetid://124232894297657"
+MiniLogo.Visible = false
+
+MinBtn.MouseButton1Click:Connect(function()
+    MainFrame.Visible = false
+    MiniLogo.Visible = true
+end)
+
+MaxBtn.MouseButton1Click:Connect(function()
+    MainFrame.Visible = true
+    MiniLogo.Visible = false
+end)
+
+MiniLogo.MouseButton1Click:Connect(function()
+    if MainFrame.Visible then
+        MainFrame.Visible = false
+        MiniLogo.Visible = true
+    else
+        MainFrame.Visible = true
+        MiniLogo.Visible = false
+    end
+end)
+
+ToggleBtn.MouseButton1Click:Connect(function()
+    boosted = not boosted
+    if boosted then
+        applyBoost()
+        ToggleBtn.BackgroundColor3 = Color3.fromRGB(0,170,0)
+        ToggleBtn.Text = "FPS Boost [ON]"
+    else
+        restoreBoost()
+        ToggleBtn.BackgroundColor3 = Color3.fromRGB(170,0,0)
+        ToggleBtn.Text = "FPS Boost [OFF]"
+    end
+end)
+
+Header.MouseButton1Click:Connect(function()
+    moving = not moving
+    if moving then
+        Header.BackgroundTransparency = 0.5
+        Header.BackgroundColor3 = Color3.fromRGB(50,50,80)
+    else
+        Header.BackgroundTransparency = 1
+    end
+end)
+
+task.spawn(function()
+    local mouse = Player:GetMouse()
+    while true do
+        if moving then
+            local pos = Vector2.new(mouse.X, mouse.Y)
+            MainFrame.Position = UDim2.fromOffset(pos.X - MainFrame.Size.X.Offset/2, pos.Y - 20)
+        end
+        task.wait()
+    end
+end)
+
+table.insert(connections, MinBtn.MouseButton1Click)
+table.insert(connections, MaxBtn.MouseButton1Click)
+table.insert(connections, MiniLogo.MouseButton1Click)
+table.insert(connections, ToggleBtn.MouseButton1Click)
+table.insert(connections, Header.MouseButton1Click)
